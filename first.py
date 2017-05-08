@@ -117,7 +117,7 @@ def view(wb):
 
 
 def ask_workbook():
-    workbook_input = input("Gib deinen Pfad zur Datei an oder zieh ihn rein per drag and drop.\n>  ")
+    workbook_input = input("Gib deinen Pfad zur Datei an oder zieh ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx).\n>  ")
     try:
         return openpyxl.load_workbook(workbook_input)
     except FileNotFoundError:
@@ -155,8 +155,8 @@ def menu(wb):
             continue
 def main():
     clear()
-    wb = openpyxl.load_workbook('example_Kopie.xlsx')
-    # wb = ask_workbook()
+    # wb = openpyxl.load_workbook('example_Kopie.xlsx')
+    wb = ask_workbook()
     menu(wb)
 
 if __name__ == "__main__":
