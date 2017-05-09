@@ -40,6 +40,8 @@ def what_sheet(wb):
 
     if this_sheet == 'exit':
         exit()
+    elif this_sheet == "":
+        return wb.get_active_sheet()
     else:
         try:
             return wb.get_sheet_by_name(this_sheet)
@@ -117,14 +119,16 @@ def view(wb):
 
 
 def ask_workbook():
-    workbook_input = input("""
-        Gib deinen Pfad zur Datei an oder zieh ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx).\n>  """)
-    try:
-        return openpyxl.load_workbook(workbook_input)
-    except FileNotFoundError:
-        clear()
-        print("Diser Pfad exsistiert nicht. Versuch es nochmal.")
-        ask_workbook()
+    workbook_input = input("Gib deinen Pfad zur Datei an oder zieh ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx).\n>  ")
+    if workbook_input == 'exit':
+        exit()
+    else:
+        try:
+            return openpyxl.load_workbook(workbook_input)
+        except FileNotFoundError:
+            clear()
+            print("Diser Pfad exsistiert nicht. Versuch es nochmal.")
+            ask_workbook()
 
 def menu(wb):
     clear()
@@ -156,7 +160,7 @@ def menu(wb):
             continue
 def main():
     clear()
-    # wb = openpyxl.load_workbook('example_Kopie.xlsx')
+    # wb = openpyxl.load_workbook('Example/example_two.xlsx')
     wb = ask_workbook()
     menu(wb)
 
