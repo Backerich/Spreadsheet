@@ -76,57 +76,6 @@ def cell_value(sheet, row_first, column_first):
     return sheet.cell(row=int(row_first), column=int(column_first)).value
 
 
-def all(wb):
-    # Fragt neu gewünschtes Sheet ab
-    sheet = get_sheet(wb)
-    clear()
-
-    # Ermittelt Maximale Reihe und Spalte
-    row_count = sheet.max_row
-    column_count = sheet.max_column
-    all_data = []
-    longest = 0
-
-    # row werden benutzt
-    for row in range(1, row_count + 1):
-        innerlist = []
-        for column in range(1 , column_count + 1):
-            values = cell_value(sheet, row, column)
-
-            if values != None:
-                innerlist.append(values)
-
-                if len(values) > longest:
-                    longest = len(values)
-
-            else:
-                innerlist.append("")
-
-        all_data.append(innerlist)
-        # print(innerlist)
-    # print(all_data)
-
-    all_data_new = []
-    for row in all_data: # functionen verbinden sehr in effizient!!!!!!
-        list_temp = []
-        for item in row:
-            # print(row)
-            value_len = longest + 1 - len(item)
-            list_temp.append(item + " " * value_len + "|")
-        # for item in list_temp:
-        #     print(item)
-        all_data_new.append(list_temp)
-    # print(all_data_new)
-
-    for row in all_data_new:
-        # print(row)
-        string_of_list = ""
-        for i in range(0, len(row)):
-            # print(i)
-            string_of_list += row[i]
-        print(string_of_list)
-
-
 # def all(wb):
 #     # Fragt neu gewünschtes Sheet ab
 #     sheet = get_sheet(wb)
@@ -159,23 +108,86 @@ def all(wb):
 
 #     all_data_new = []
 #     for row in all_data: # functionen verbinden sehr in effizient!!!!!!
-#         list_temp = ""
+#         list_temp = []
 #         for item in row:
 #             # print(row)
 #             value_len = longest + 1 - len(item)
-#             list_temp += (item + " " * value_len + "|")
+#             list_temp.append(item + " " * value_len + "|")
 #         # for item in list_temp:
 #         #     print(item)
 #         all_data_new.append(list_temp)
 #     # print(all_data_new)
 
-#     # for row in all_data_new:
-#     #     # print(row)
-#     #     string_of_list = ""
-#     #     for i in range(0, len(row)):
-#     #         # print(i)
-#     #         string_of_list += row[i]
-#     #     print(string_of_list)
+#     for row in all_data_new:
+#         # print(row)
+#         string_of_list = ""
+#         for i in range(0, len(row)):
+#             # print(i)
+#             string_of_list += row[i]
+#         print(string_of_list)
+
+
+def all(wb):
+    # Fragt neu gewünschtes Sheet ab
+    sheet = get_sheet(wb)
+    clear()
+
+    # Ermittelt Maximale Reihe und Spalte
+    try:
+        row_count = sheet.max_row
+        column_count = sheet.max_column
+    except AttributeError:
+        print("Versuch es noch einmal!")
+
+    all_data = []
+    longest = 0
+    column_list = []
+
+    for i in range(0, row_count + 1):
+        column_list.append(i)
+    all_data.append(column_list)
+
+    # row werden benutzt
+    for row in range(1, row_count + 1):
+        innerlist = []
+        for column in range(1 , column_count + 1):
+            values = cell_value(sheet, row, column)
+
+            if values != None:
+                innerlist.append(values)
+
+                if len(values) > longest:
+                    longest = len(values)
+
+            else:
+                innerlist.append("")
+
+        all_data.append(innerlist)
+        # print(innerlist)
+    # print(all_data)
+
+    all_data_new = []
+    for row in all_data: # functionen verbinden sehr in effizient!!!!!!
+        list_temp = []
+        for item in row:
+            # print(row)
+            value_len = longest + 1 - len(str(item))
+            list_temp.append(str(item) + " " * value_len + "|")
+        # for item in list_temp:
+        #     print(item)
+        all_data_new.append(list_temp)
+    # print(all_data_new)
+
+    for row in all_data_new:
+        # print(row)
+        string_of_list = ""
+        string_of_list += str(all_data_new.index(row)) + "| "
+        # print(string_of_list)
+
+        for i in range(0, len(row)):
+            # print(i)
+            string_of_list += row[i]
+        print(string_of_list)
 
 
 def position(sheet):
