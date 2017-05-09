@@ -76,6 +76,48 @@ def cell_value(sheet, row_first, column_first):
     return sheet.cell(row=int(row_first), column=int(column_first)).value
 
 
+# def all(wb):
+#     # Fragt neu gewünschtes Sheet ab
+#     sheet = get_sheet(wb)
+#     clear()
+
+#     # Ermittelt Maximale Reihe und Spalte
+#     row_count = sheet.max_row
+#     column_count = sheet.max_column
+#     all_data = {} #dict->list
+#     longest = 0
+
+#     # TODO: Tabelle mit Werten des Sheets, Kommentieren
+#     for column in range(1 , column_count + 1):
+#         values_temp = []
+#         for row in range(1, row_count + 1):
+#             values = cell_value(sheet, row, column)
+
+#             if values != None:
+#                 values_temp.append(values)
+
+#                 if len(values) > longest:
+#                     longest = len(values)
+
+#             else:
+#                 values_temp.append("\n")
+
+#             all_data[column] = values_temp
+
+#     for key, value in all_data.items():
+#         key_len_temp = len(str(key))
+#         print(str(key) + " " * longest + "|")
+#         print(value)
+#         for item in value:
+#             if value != "\n":
+#                 value_len = longest + 1 - len(item)
+#             else:
+#                 values_temp = longest + 2 - len(item)
+#             print(str(item) + " " * value_len + "|")
+#     # print(longest)
+#     # print(all_data)
+
+
 def all(wb):
     # Fragt neu gewünschtes Sheet ab
     sheet = get_sheet(wb)
@@ -84,19 +126,48 @@ def all(wb):
     # Ermittelt Maximale Reihe und Spalte
     row_count = sheet.max_row
     column_count = sheet.max_column
-    # all_data = {}
+    all_data = []
+    longest = 0
 
-    # TODO: Tabelle mit Werten des Sheets
-    # header immer selbe row und anderer column
-    for column in range(1 , column_count + 1):
-        for row in range(1, row_count + 1):
+    # row werden benutzt
+    for row in range(1, row_count + 1):
+        innerlist = []
+        for column in range(1 , column_count + 1):
             values = cell_value(sheet, row, column)
+
             if values != None:
-                print(values)
-                # all_data = {row , {}}
-                print(all_data)
+                innerlist.append(values)
+
+                if len(values) > longest:
+                    longest = len(values)
+
             else:
-                print("\n")
+                innerlist.append("")
+
+        all_data.append(innerlist)
+        # print(innerlist)
+    # print(all_data)
+
+    all_data_new = []
+    for row in all_data: # functionen verbinden sehr in effizient!!!!!!
+        list_temp = []
+        for item in row:
+            # print(row)
+            value_len = longest + 1 - len(item)
+            list_temp.append(item + " " * value_len + "|")
+        # for item in list_temp:
+        #     print(item)
+        all_data_new.append(list_temp)
+    # print(all_data_new)
+
+    for row in all_data_new:
+        # print(row)
+        string_of_list = ""
+        for i in range(0, len(row)):
+            # print(i)
+            string_of_list += row[i]
+        print(string_of_list)
+
 
 
 def position(sheet):
@@ -178,6 +249,9 @@ def menu(wb):
             clear()
             # Zeigt alle Inhalte des Sheets an
             # TODO: Muss noch implimentiert werden
+
+            # print(all(wb)) <---- richtige!!!!!!!!
+
             all(wb)
             # Abrage ob das Programm beendet werden soll
             continue_request(wb , "\nWollen sie weiter machen [Y/n]? \n>  ")
@@ -198,5 +272,9 @@ if __name__ == "__main__":
     main()
 
 
+# longest = 0
+# for item in items:
+#     if len(item) > 0:
+#         longest = len(item)
 
 
