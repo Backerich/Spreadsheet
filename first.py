@@ -8,16 +8,6 @@ import re
 # import time
 # import traceback
 
-
-###############################################################################
-# PROBLEME: -view unerwarteter error -> siehe unten (nicht wieder aufgetreten)
-#           -
-# IMPLIMENTIEREN: -make the cotinue func universal
-#                 -übersicht
-#                 -
-###############################################################################
-
-
 def exit():
     # Verlässt das Programm
     return sys.exit()
@@ -28,7 +18,7 @@ def clear():
     os.system("cls" if os.name == "nt" else "clear")
 
 
-def continue_loop(wb, output):
+def continue_request(wb, output):
     # Abfrage ob Programm beendet werden soll oder weiter laufen soll
     continue_loop = input(output)
     if (continue_loop == 'n') or (continue_loop == 'exit'): # quit Abfrage
@@ -176,7 +166,7 @@ def menu(wb):
             clear()
             print(view(wb))
             # Abrage ob das Programm beendet werden soll
-            continue_loop(wb, "\nWollen sie weiter machen [Y/n]? \n>  ")
+            continue_request(wb, "\nWollen sie weiter machen [Y/n]? \n>  ")
         elif user_input == 'edit':
             # Falls input 'edit' wird abgefragt ob der User das Workbook ändern will bzw. in welches
             clear()
@@ -190,7 +180,7 @@ def menu(wb):
             # TODO: Muss noch implimentiert werden
             all(wb)
             # Abrage ob das Programm beendet werden soll
-            continue_loop(wb , "\nWollen sie weiter machen [Y/n]? \n>  ")
+            continue_request(wb , "\nWollen sie weiter machen [Y/n]? \n>  ")
         else:
             # Fehlermeldung falls es diesen Menüpunkt nicht gibt und läuft die Schleife nochmal durch
             clear()
