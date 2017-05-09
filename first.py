@@ -28,8 +28,9 @@ def clear():
     os.system("cls" if os.name == "nt" else "clear")
 
 
-def continue_loop(wb): # TODO: Universal machen
-    continue_loop = input("\nWollen sie weiter machen [Y/n]? \n>  ")
+def continue_loop(wb, output):
+    # Abfrage ob Programm beendet werden soll oder weiter laufen soll
+    continue_loop = input(output)
     if (continue_loop == 'n') or (continue_loop == 'exit'): # quit Abfrage
         exit()
     else:
@@ -175,7 +176,7 @@ def menu(wb):
             clear()
             print(view(wb))
             # Abrage ob das Programm beendet werden soll
-            continue_loop(wb)
+            continue_loop(wb, "\nWollen sie weiter machen [Y/n]? \n>  ")
         elif user_input == 'edit':
             # Falls input 'edit' wird abgefragt ob der User das Workbook ändern will bzw. in welches
             clear()
@@ -189,7 +190,7 @@ def menu(wb):
             # TODO: Muss noch implimentiert werden
             all(wb)
             # Abrage ob das Programm beendet werden soll
-            continue_loop(wb)
+            continue_loop(wb , "\nWollen sie weiter machen [Y/n]? \n>  ")
         else:
             # Fehlermeldung falls es diesen Menüpunkt nicht gibt und läuft die Schleife nochmal durch
             clear()
@@ -198,9 +199,9 @@ def menu(wb):
 def main():
     clear()
     # DEBUG: Default Workbbok zum Debugen
-    # wb = openpyxl.load_workbook('Example/example_two.xlsx')
+    wb = openpyxl.load_workbook('Example/example_two.xlsx')
     # Fragt Workbook ab
-    wb = ask_workbook()
+    # wb = ask_workbook()
     menu(wb)
 
 if __name__ == "__main__":
