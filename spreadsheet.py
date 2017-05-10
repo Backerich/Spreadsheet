@@ -76,80 +76,93 @@ def cell_value(sheet, row_first, column_first):
     return sheet.cell(row=int(row_first), column=int(column_first)).value
 
 
-# def all(wb):
-#     # Fragt neu gewünschtes Sheet ab
-#     sheet = get_sheet(wb)
-#     clear()
+def grid(string_rows):
+    for row in string_rows:
+        string_of_list = ""
+        # Fügt die Reihen Zahlen hinzu
+        string_of_list += str(string_rows.index(row)) + "| "
 
-#     # Ermittelt Maximale Reihe und Spalte
-#     row_count = sheet.max_row
-#     column_count = sheet.max_column
-#     all_data = []
-#     longest = 0
+        for i in range(0, len(row)):
+            string_of_list += row[i]
+        print(string_of_list)
 
-#     # row werden benutzt
-#     for row in range(1, row_count + 1):
-#         innerlist = []
-#         for column in range(1 , column_count + 1):
-#             values = cell_value(sheet, row, column)
 
-#             if values != None:
-#                 innerlist.append(values)
+def raw_grid(raw_rows, longest):
+    string_rows = []
 
-#                 if len(values) > longest:
-#                     longest = len(values)
+    for rows_in_list in raw_rows:
+        list_temp = []
+        for item in rows_in_list:
+            value_length = longest + 1 - len(str(item))
+            list_temp.append(str(item) + " " * value_length + "|")
+        string_rows.append(list_temp)
+    return string_rows
 
-#             else:
-#                 innerlist.append("")
+def grid(string_rows):
+    for row in string_rows:
+        string_of_list = ""
+        # Fügt die Reihen Zahlen hinzu
+        string_of_list += str(string_rows.index(row)) + "| "
 
-#         all_data.append(innerlist)
-#         # print(innerlist)
-#     # print(all_data)
+        for i in range(0, len(row)):
+            string_of_list += row[i]
+        print(string_of_list)
 
-#     all_data_new = []
-#     for row in all_data: # functionen verbinden sehr in effizient!!!!!!
+#TODO: Zusammenfassen des raw_grids und grids
+# def raw_grid(raw_rows, longest):
+#     string_rows = []
+#     raw_rows = raw_rows
+#     # print(raw_rows)
+#     # print("+"*20)
+#     for row in raw_rows:
+#         string_rows.append(row[i] for i in range(0, len(row))
+#     print("-"*20)
+#     print(string_rows)
+
+#     for rows_in_list in raw_rows: # eine Reihe
+#         #print(rows_in_list)
+#         #print("*n"*20)
 #         list_temp = []
-#         for item in row:
-#             # print(row)
-#             value_len = longest + 1 - len(item)
-#             list_temp.append(item + " " * value_len + "|")
-#         # for item in list_temp:
-#         #     print(item)
-#         all_data_new.append(list_temp)
-#     # print(all_data_new)
 
-#     for row in all_data_new:
-#         # print(row)
-#         string_of_list = ""
-#         for i in range(0, len(row)):
-#             # print(i)
-#             string_of_list += row[i]
-#         print(string_of_list)
+#         row_number = raw_rows.index(rows_in_list)
+#         print(row_number)
+#         list_temp.append(row_number[0])
+#         print(list_temp)
+
+#         for item in rows_in_list: # jedes item der Reihe
+#             #print(item)
+#             #print("-"*20)
+#             value_length = longest + 1 - len(str(item))
+#             list_temp.append(str(item) + " " * value_length + "|")
+#             #print(list_temp)
+#             #print("-"*20)
+#         string_rows.append(list_temp)
+#         #print(string_rows)
+#         #print("-"*20)
+
+#         for string_row in string_rows:
+#             #print(string_row)
+#             #print("-"*20)
+#             for items in string_row:
+#                 print("hallo")
+#                 # print(items)
+#                 #print("-"*20)
+#         # Fügt die Reihen Zahlen hinzu
+#         # string_of_list += str(string_rows.index(row)) + "| "
+
+#         # for i in range(0, len(row)):
+#             # string_of_list += row[i]
+#         # rint(string_of_list)
 
 
-def all(wb):
-    # Fragt neu gewünschtes Sheet ab
-    sheet = get_sheet(wb)
-    clear()
-
-    # Ermittelt Maximale Reihe und Spalte
-    try:
-        row_count = sheet.max_row
-        column_count = sheet.max_column
-    except AttributeError:
-        print("Versuch es noch einmal!")
-
-    all_data = []
+def get_values(sheet, row_count, column_count):
+    all_raw_rows = []
     longest = 0
-    column_list = []
+    all_raw_rows.append(i for i in  range(1, row_count + 1))
 
-    for i in range(0, row_count + 1):
-        column_list.append(i)
-    all_data.append(column_list)
-
-    # row werden benutzt
     for row in range(1, row_count + 1):
         innerlist = []
+
         for column in range(1 , column_count + 1):
             values = cell_value(sheet, row, column)
 
@@ -161,33 +174,35 @@ def all(wb):
 
             else:
                 innerlist.append("")
+        all_raw_rows.append(innerlist)
+    return all_raw_rows, longest
 
-        all_data.append(innerlist)
-        # print(innerlist)
-    # print(all_data)
 
-    all_data_new = []
-    for row in all_data: # functionen verbinden sehr in effizient!!!!!!
-        list_temp = []
-        for item in row:
-            # print(row)
-            value_len = longest + 1 - len(str(item))
-            list_temp.append(str(item) + " " * value_len + "|")
-        # for item in list_temp:
-        #     print(item)
-        all_data_new.append(list_temp)
-    # print(all_data_new)
+def max_sheet(sheet):
+    try:
+        return sheet.max_row, sheet.max_column
+    except AttributeError:
+        print("Dieses Sheet hat keine Spalte oder Zeilen!")
 
-    for row in all_data_new:
-        # print(row)
-        string_of_list = ""
-        string_of_list += str(all_data_new.index(row)) + "| "
-        # print(string_of_list)
 
-        for i in range(0, len(row)):
-            # print(i)
-            string_of_list += row[i]
-        print(string_of_list)
+def all(wb):
+    # Fragt neu gewünschtes Sheet ab
+    sheet = get_sheet(wb)
+    clear()
+
+    # Ermittelt Maximale Reihe und Spalte
+    max_row = max_sheet(sheet)[0]
+    max_column = max_sheet(sheet)[1]
+
+    # Zwei Dimensionale Liste mit den den raw Row Werten
+    values = get_values(sheet, max_row, max_column)[0]
+
+    # Ermittelt die längste Zelle des Sheets
+    longest = get_values(sheet, max_row, max_column)[1]
+
+    # Verarbeitet die Werte zu einem Grid von Strings
+    string_rows = raw_grid(values, longest)
+    grid(string_rows)
 
 
 def position(sheet):
@@ -267,12 +282,9 @@ def menu(wb):
             clear()
         elif user_input == 'all':
             clear()
-            # Zeigt alle Inhalte des Sheets an
-            # TODO: Muss noch implimentiert werden
+            # Zeigt alle Inhalte des Sheets an(eine Übersicht)
+            print(all(wb))
 
-            # print(all(wb)) <---- richtige!!!!!!!!
-
-            all(wb)
             # Abrage ob das Programm beendet werden soll
             continue_request(wb , "\nWollen sie weiter machen [Y/n]? \n>  ")
         else:
@@ -290,11 +302,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-# longest = 0
-# for item in items:
-#     if len(item) > 0:
-#         longest = len(item)
-
 
