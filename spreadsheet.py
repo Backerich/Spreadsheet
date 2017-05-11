@@ -76,29 +76,40 @@ def cell_value(sheet, row_first, column_first):
     return sheet.cell(row=int(row_first), column=int(column_first)).value
 
 
-def grid(string_rows):
-    for row in string_rows:
-        string_of_list = ""
-        # Fügt die Reihen Zahlen hinzu
-        string_of_list += str(string_rows.index(row)) + "| "
+# def grid(string_rows):
+#     for row in string_rows:
+#         string_of_list = ""
+#         # Fügt die Reihen Zahlen hinzu
+#         string_of_list += str(string_rows.index(row)) + "| "
 
-        for i in range(0, len(row)):
-            string_of_list += row[i]
-        print(string_of_list)
+#         for i in range(0, len(row)):
+#             string_of_list += row[i]
+#         print(string_of_list)
 
 
-def raw_grid(raw_rows, longest):
+# def raw_grid(raw_rows, longest):
+#     string_rows = []
+
+#     for rows_in_list in raw_rows:
+#         list_temp = []
+#         for item in rows_in_list:
+#             value_length = longest + 1 - len(str(item))
+#             list_temp.append(str(item) + " " * value_length + "|")
+#         string_rows.append(list_temp)
+#     return string_rows
+
+
+def grid(values, longest):
+    # Vorher raw_grid
     string_rows = []
-
-    for rows_in_list in raw_rows:
+    for rows_in_list in values:
         list_temp = []
         for item in rows_in_list:
             value_length = longest + 1 - len(str(item))
             list_temp.append(str(item) + " " * value_length + "|")
         string_rows.append(list_temp)
-    return string_rows
 
-def grid(string_rows):
+    # Vorher grid
     for row in string_rows:
         string_of_list = ""
         # Fügt die Reihen Zahlen hinzu
@@ -107,52 +118,6 @@ def grid(string_rows):
         for i in range(0, len(row)):
             string_of_list += row[i]
         print(string_of_list)
-
-#TODO: Zusammenfassen des raw_grids und grids
-# def raw_grid(raw_rows, longest):
-#     string_rows = []
-#     raw_rows = raw_rows
-#     # print(raw_rows)
-#     # print("+"*20)
-#     for row in raw_rows:
-#         string_rows.append(row[i] for i in range(0, len(row))
-#     print("-"*20)
-#     print(string_rows)
-
-#     for rows_in_list in raw_rows: # eine Reihe
-#         #print(rows_in_list)
-#         #print("*n"*20)
-#         list_temp = []
-
-#         row_number = raw_rows.index(rows_in_list)
-#         print(row_number)
-#         list_temp.append(row_number[0])
-#         print(list_temp)
-
-#         for item in rows_in_list: # jedes item der Reihe
-#             #print(item)
-#             #print("-"*20)
-#             value_length = longest + 1 - len(str(item))
-#             list_temp.append(str(item) + " " * value_length + "|")
-#             #print(list_temp)
-#             #print("-"*20)
-#         string_rows.append(list_temp)
-#         #print(string_rows)
-#         #print("-"*20)
-
-#         for string_row in string_rows:
-#             #print(string_row)
-#             #print("-"*20)
-#             for items in string_row:
-#                 print("hallo")
-#                 # print(items)
-#                 #print("-"*20)
-#         # Fügt die Reihen Zahlen hinzu
-#         # string_of_list += str(string_rows.index(row)) + "| "
-
-#         # for i in range(0, len(row)):
-#             # string_of_list += row[i]
-#         # rint(string_of_list)
 
 
 def get_values(sheet, row_count, column_count):
@@ -201,8 +166,11 @@ def all(wb):
     longest = get_values(sheet, max_row, max_column)[1]
 
     # Verarbeitet die Werte zu einem Grid von Strings
-    string_rows = raw_grid(values, longest)
-    grid(string_rows)
+    # string_rows = raw_grid(values, longest)
+    # grid(string_rows)
+
+    # test new grid
+    grid(values, longest)
 
 
 def position(sheet):
@@ -262,7 +230,7 @@ def menu(wb):
         print("Gib 'exit' ein um das Programm zu verlassen.")
         print("Gib 'view' ein um bestimmt Zeilen zu inspizieren.")
         print("Gib 'edit' ein um dein workbook zu ändern.")
-        print("Gib 'all' ein um einen überblick von deinem Spread sheet zu erhalten.")
+        print("Gib 'all' ein um einen überblick von deinem Spreadsheet zu erhalten.")
         user_input = input(">  ").lower()
         
         if user_input == 'exit':
@@ -283,8 +251,7 @@ def menu(wb):
         elif user_input == 'all':
             clear()
             # Zeigt alle Inhalte des Sheets an(eine Übersicht)
-            print(all(wb))
-
+            all(wb)
             # Abrage ob das Programm beendet werden soll
             continue_request(wb , "\nWollen sie weiter machen [Y/n]? \n>  ")
         else:
