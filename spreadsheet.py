@@ -81,6 +81,15 @@ def list_sheets(wb):
         counter += 1
 
 
+def max_sheet(sheet):
+    try:
+        # Falls es eine Reihe und Spalte gibt wird die höchste wiedergegeben
+        return sheet.max_row, sheet.max_column
+    except AttributeError:
+        # Falls es keine Reihe oder Spalte gibt wird eine Fahlermeldung ausgegeben
+        print("Dieses Sheet hat keine Spalte oder Zeilen!")
+
+
 def get_sheet(wb):
     # Zeigt alle Sheets, fragt ab welches benutzt werden soll und gibt dieses wieder
     list_sheets(wb)
@@ -92,7 +101,30 @@ def cell_value(sheet, row_first, column_first):
     return sheet.cell(row=int(row_first), column=int(column_first)).value
 
 
-def data_to_compare(wb):
+def get_values(sheet, row_count, column_count):
+    all_raw_rows = []
+    longest = 0
+    all_raw_rows.append(i for i in  range(1, row_count + 1))
+
+    for row in range(1, row_count + 1):
+        innerlist = []
+
+        for column in range(1 , column_count + 1):
+            values = cell_value(sheet, row, column)
+
+            if values != None:
+                innerlist.append(values)
+
+                if len(values) > longest:
+                    longest = len(values)
+
+            else:
+                innerlist.append("")
+        all_raw_rows.append(innerlist)
+    return all_raw_rows, longest
+
+
+def sheets_to_compare(wb):
     first_workbook_ask = input("Wollen sie ihr momentanes Spreadsheet als Ausgangsdatei verwenden? [Y/n]\n>  ")
     clear()
 
@@ -133,12 +165,53 @@ Das Spreadsheet was sie angeben wird als Vergleichsdatei verwendet!\n>  """)
     return first_sheet, second_sheet
 
 
+def position(sheet):
+    position_data = input("Geben sie die Positon ihrer Zelle an wie: 'Reihe, Spalte' (z.B. 2,1).\n>  ")
+
+    if position_data != 'exit':
+        clear()
+
+        # RE: Muster zum filtern der Koordinaten 
+        line = re.compile(r'''
+        ^(?P<row>[\d]+),\s*
+        (?P<column>[\d]+)$
+        ''', re.X|re.M)
+
+        # RE: Vergleicht das Muster mit dem Input und filtert je Reihe und Spalte heraus 
+        # und gibt diese Werte and die 'cell_value' Methode weiter
+        for match in line.finditer(position_data):
+            return cell_value(sheet, match.group('row'), match.group('column'))
+    else:
+        exit()
+
+
 def compare(wb):
-    data = data_to_compare(wb)
+    # Ermittelt die gewünschten Sheets
+    data = sheets_to_compare(wb)
     first_data = data[0]
     second_data = data[1]
-    print(first_data)
-    print(second_data)
+
+    # Ermittelt Maximale Reihe und Spalte des ersten Sheets
+    first_max_sheet = max_sheet(first_data)
+    first_max_row = first_max_sheet[0]
+    first_max_column = first_max_sheet[1]
+
+    # Ermittelt Maximale Reihe und Spalte des zweiten Sheets
+    second_max_sheet = max_sheet(second_data)
+    second_max_row = second_max_sheet[0]
+    second_max_column = second_max_sheet[1]
+
+    # Ermittelt Werte der sheets
+    first_values = get_values(first_data, first_max_row, first_max_column)[0]
+    second_values = get_values(second_data, second_max_row, second_max_column)[0]
+
+    # Delete first value
+    del first_values[0]
+    del second_values[0]
+
+    # Test Unit
+    print(first_values)
+    print(second_values)
 
 
 def grid(values, longest):
@@ -163,46 +236,15 @@ def grid(values, longest):
         print(string_temp)
 
 
-def get_values(sheet, row_count, column_count):
-    all_raw_rows = []
-    longest = 0
-    all_raw_rows.append(i for i in  range(1, row_count + 1))
-
-    for row in range(1, row_count + 1):
-        innerlist = []
-
-        for column in range(1 , column_count + 1):
-            values = cell_value(sheet, row, column)
-
-            if values != None:
-                innerlist.append(values)
-
-                if len(values) > longest:
-                    longest = len(values)
-
-            else:
-                innerlist.append("")
-        all_raw_rows.append(innerlist)
-    return all_raw_rows, longest
-
-
-def max_sheet(sheet):
-    try:
-        # Falls es eine Reihe und Spalte gibt wird die höchste wiedergegeben
-        return sheet.max_row, sheet.max_column
-    except AttributeError:
-        # Falls es keine Reihe oder Spalte gibt wird eine Fahlermeldung ausgegeben
-        print("Dieses Sheet hat keine Spalte oder Zeilen!")
-
-
 def all(wb):
     # Fragt neu gewünschtes Sheet ab
     sheet = get_sheet(wb)
     clear()
 
     # Ermittelt Maximale Reihe und Spalte
-    max_row = max_sheet(sheet)[0]
-    max_column = max_sheet(sheet)[1]
+    max_row_column = max_sheet(sheet)
+    max_row = max_row_column[0]
+    max_column = max_row_column[1]
 
     # Zwei Dimensionale Liste mit den den raw Row Werten
     values = get_values(sheet, max_row, max_column)[0]
@@ -212,26 +254,6 @@ def all(wb):
 
     # Verarbeitet die Werte zu einem Grid von Strings
     grid(values, longest)
-
-
-def position(sheet):
-    position_data = input("Geben sie die Positon ihrer Zelle an wie: 'Reihe, Spalte' (z.B. 2,1).\n>  ")
-
-    if position_data != 'exit':
-        clear()
-
-        # RE: Muster zum filtern der Koordinaten 
-        line = re.compile(r'''
-        ^(?P<row>[\d]+),\s*
-        (?P<column>[\d]+)$
-        ''', re.X|re.M)
-
-        # RE: Vergleicht das Muster mit dem Input und filtert je Reihe und Spalte heraus 
-        # und gibt diese Werte and die 'cell_value' Methode weiter
-        for match in line.finditer(position_data):
-            return cell_value(sheet, match.group('row'), match.group('column'))
-    else:
-        exit()
 
 
 def view(wb):
@@ -250,22 +272,48 @@ def view(wb):
         return "Diese Zelle gibt es nicht bitte versuchen sie es nochmal."
 
 
+def help():
+    longest_key = 0
+    funktionen = {
+    "all" : "Gibt eine tabellarische Übersicht des ausgewählten Sheets wieder",
+    "view": "Gibt den Inhalt einer gewünschten Zelle wieder",
+    "compare": "Schreibt eine neue Datei um Datensätze von B auf A zu überschreiben falls es überschneidungen gibt.",
+    "exit": "Velässt das Programm"}
+
+    for key, value in funktionen.items():
+        if len(key) > longest_key:
+            longest_key = len(key)
+
+    for key, value in funktionen.items():
+        print(key + " " * (longest_key - len(key)) + "| " + value)
+
+    print("\n")
+    ask_function = input("Welche Funktion möchten sie erklärt haben?\n>  ")
+
+    if ask_function == 'exit':
+        exit()
+    else:
+        clear()
+        print("Wird noch implimentiert.")
+
+
 def menu(wb):
     clear()
 
     while True:
-        # Alle möglichen Functionen des Programmes als Menü
-        print("Gib 'exit' ein um das Programm zu verlassen.")
-        print("Gib 'view' ein um bestimmt Zeilen zu inspizieren.")
-        print("Gib 'edit' ein um dein workbook zu ändern.")
+        # Alle möglichen Funktionen des Programmes als Menü
         print("Gib 'all' ein um einen überblick von deinem Spreadsheet zu erhalten.")
+        print("Gib 'view' ein um bestimmt Zeilen zu inspizieren.")
         print("Gib 'compare' ein um Datensätze der ersten Datei mit Datensätzen einer zweiten zu ersetzen.")
+        print("Gib 'edit' ein um dein workbook zu ändern.")
+        print("Gib 'help' ein wenn du hilfe brauchst.")
+        print("Gib 'exit' ein um das Programm zu verlassen.")
 
         # Der Userinput um auf die einzelnen Menüpunkte zuzugreifen:
-        # user_input = input(">  ").lower()
+        user_input = input(">  ").lower()
 
         # DEBUG: Als default der Eingabe:
-        user_input = 'compare'
+        # user_input = 'compare'
         
         if user_input == 'exit':
             exit()
@@ -305,6 +353,14 @@ def menu(wb):
 
             # Abrage ob das Programm beendet werden soll
             continue_request(wb , "\nWollen sie weiter machen [Y/n]? \n>  ")
+        elif user_input == 'help':
+            clear()
+
+            # Erläuterung der Eingabe optionen
+            help()
+
+            # Abrage ob das Programm beendet werden soll
+            continue_request(wb, "\nWollen sie weiter machen [Y/n]? \n>  ")
         else:
             # Fehlermeldung falls es diesen Menüpunkt nicht gibt und läuft die Schleife nochmal durch
             clear()
