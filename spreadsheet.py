@@ -18,6 +18,21 @@ def clear():
     os.system("cls" if os.name == "nt" else "clear")
 
 
+def ask_workbook(input_string):
+    workbook_input = input(input_string) # "Gib deinen Pfad zur Datei an oder zieh ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx).\n>  "
+    if workbook_input == 'exit':
+        exit()
+    else:
+        try:
+            # Falls es den Path gibt verwendet er nun dieses Workbook
+            return openpyxl.load_workbook(workbook_input)
+        except FileNotFoundError:
+            # Falls nicht wird eine Fehlermeldung ausgegeben und nochmal abgefragt
+            clear()
+            print("Diser Pfad exsistiert nicht. Versuch es nochmal.")
+            ask_workbook("Gib deinen Pfad zur Datei an oder zieh ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx).\n>  ")
+
+
 def continue_request(wb, output):
     # Abfrage ob Programm beendet werden soll oder weiter laufen soll
     continue_loop = input(output)
@@ -26,6 +41,7 @@ def continue_request(wb, output):
     else:
         # wenn nicht 'exit' geht es wieder zum Ausgangsmenü zurück
         menu(wb)
+
 
 def what_sheet(wb):
     this_sheet = input("Welches Sheet willst du benutzen? \n>  ") 
@@ -76,48 +92,75 @@ def cell_value(sheet, row_first, column_first):
     return sheet.cell(row=int(row_first), column=int(column_first)).value
 
 
-# def grid(string_rows):
-#     for row in string_rows:
-#         string_of_list = ""
-#         # Fügt die Reihen Zahlen hinzu
-#         string_of_list += str(string_rows.index(row)) + "| "
+def data_to_compare(wb):
+    first_workbook_ask = input("Wollen sie ihr momentanes Spreadsheet als Ausgangsdatei verwenden? [Y/n]\n>  ")
+    clear()
 
-#         for i in range(0, len(row)):
-#             string_of_list += row[i]
-#         print(string_of_list)
+    first_sheet = None
+    second_sheet = None
+    first_workbook = None
+    second_workbook = None
+
+    if first_workbook_ask == 'exit':
+        exit()
+    elif first_workbook_ask == 'n':
+
+        first_workbook = ask_workbook("""Geben sie ihren Pfad zur Datei an oder ziehen sie ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx.  
+Das Spreadsheet was sie angeben wird als Ausgangsdatei verwendet!\n>  """)
+        first_sheet = get_sheet(first_workbook)
+        clear()
+    else:
+        first_workbook = wb
+        first_sheet = get_sheet(first_workbook)
+        clear()
+
+    second_workbook_ask = input("Wollen sie eine andere Datei zum Vergleich nehmen? [Y/n]\n>  ")
+    clear()
+
+    if second_workbook_ask == 'exit':
+        exit()
+    elif second_workbook_ask == 'n':
+        second_sheet = get_sheet(first_workbook)
+        clear()
+    else:
+
+        second_workbook = ask_workbook("""Geben sie ihren Pfad zur Datei an oder ziehen sie ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx.
+Das Spreadsheet was sie angeben wird als Vergleichsdatei verwendet!\n>  """)
+
+        second_sheet = get_sheet(second_workbook)
+        clear()
+
+    return first_sheet, second_sheet
 
 
-# def raw_grid(raw_rows, longest):
-#     string_rows = []
-
-#     for rows_in_list in raw_rows:
-#         list_temp = []
-#         for item in rows_in_list:
-#             value_length = longest + 1 - len(str(item))
-#             list_temp.append(str(item) + " " * value_length + "|")
-#         string_rows.append(list_temp)
-#     return string_rows
+def compare(wb):
+    data = data_to_compare(wb)
+    first_data = data[0]
+    second_data = data[1]
+    print(first_data)
+    print(second_data)
 
 
 def grid(values, longest):
     # Vorher raw_grid
     string_rows = []
     for rows_in_list in values:
-        list_temp = []
+        raw_temp = []
         for item in rows_in_list:
             value_length = longest + 1 - len(str(item))
-            list_temp.append(str(item) + " " * value_length + "|")
-        string_rows.append(list_temp)
+            raw_temp.append(str(item) + " " * value_length + "|")
+        string_rows.append(raw_temp)
 
     # Vorher grid
     for row in string_rows:
-        string_of_list = ""
+        string_temp = ""
+
         # Fügt die Reihen Zahlen hinzu
-        string_of_list += str(string_rows.index(row)) + "| "
+        string_temp += str(string_rows.index(row)) + "| "
 
         for i in range(0, len(row)):
-            string_of_list += row[i]
-        print(string_of_list)
+            string_temp += row[i]
+        print(string_temp)
 
 
 def get_values(sheet, row_count, column_count):
@@ -145,8 +188,10 @@ def get_values(sheet, row_count, column_count):
 
 def max_sheet(sheet):
     try:
+        # Falls es eine Reihe und Spalte gibt wird die höchste wiedergegeben
         return sheet.max_row, sheet.max_column
     except AttributeError:
+        # Falls es keine Reihe oder Spalte gibt wird eine Fahlermeldung ausgegeben
         print("Dieses Sheet hat keine Spalte oder Zeilen!")
 
 
@@ -166,10 +211,6 @@ def all(wb):
     longest = get_values(sheet, max_row, max_column)[1]
 
     # Verarbeitet die Werte zu einem Grid von Strings
-    # string_rows = raw_grid(values, longest)
-    # grid(string_rows)
-
-    # test new grid
     grid(values, longest)
 
 
@@ -209,63 +250,83 @@ def view(wb):
         return "Diese Zelle gibt es nicht bitte versuchen sie es nochmal."
 
 
-def ask_workbook():
-    workbook_input = input("Gib deinen Pfad zur Datei an oder zieh ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx).\n>  ")
-    if workbook_input == 'exit':
-        exit()
-    else:
-        try:
-            # Falls es den Path gibt verwendet er nun dieses Workbook
-            return openpyxl.load_workbook(workbook_input)
-        except FileNotFoundError:
-            # Falls nicht wird eine Fehlermeldung ausgegeben und nochmal abgefragt
-            clear()
-            print("Diser Pfad exsistiert nicht. Versuch es nochmal.")
-            ask_workbook()
-
 def menu(wb):
     clear()
+
     while True:
         # Alle möglichen Functionen des Programmes als Menü
         print("Gib 'exit' ein um das Programm zu verlassen.")
         print("Gib 'view' ein um bestimmt Zeilen zu inspizieren.")
         print("Gib 'edit' ein um dein workbook zu ändern.")
         print("Gib 'all' ein um einen überblick von deinem Spreadsheet zu erhalten.")
-        user_input = input(">  ").lower()
+        print("Gib 'compare' ein um Datensätze der ersten Datei mit Datensätzen einer zweiten zu ersetzen.")
+
+        # Der Userinput um auf die einzelnen Menüpunkte zuzugreifen:
+        # user_input = input(">  ").lower()
+
+        # DEBUG: Als default der Eingabe:
+        user_input = 'compare'
         
         if user_input == 'exit':
             exit()
         elif user_input == 'view':
             # Falls Input 'view' Abfrage vom view um einzelnen Zelle Inhalte zu betrachen
             clear()
+
+            #
             print(view(wb))
+
             # Abrage ob das Programm beendet werden soll
             continue_request(wb, "\nWollen sie weiter machen [Y/n]? \n>  ")
         elif user_input == 'edit':
             # Falls input 'edit' wird abgefragt ob der User das Workbook ändern will bzw. in welches
             clear()
+
+            # 
             print("Ändere dein workbook.\n")
+
             # Ersetzt das aktuelle Workbook mit dem neuen
-            wb = ask_workbook()
-            clear()
+            wb = ask_workbook("Geben sie ihren Pfad zur Datei an oder ziehen sie ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx.\n>  ")
         elif user_input == 'all':
+            # Falls input 'all' wird eine tabellarische Übersicht des ausgewählten Sheets angezeigt
             clear()
+
             # Zeigt alle Inhalte des Sheets an(eine Übersicht)
             all(wb)
+
+            # Abrage ob das Programm beendet werden soll
+            continue_request(wb , "\nWollen sie weiter machen [Y/n]? \n>  ")
+        elif user_input == 'compare':
+            # Falls input 'compare' wird Datei A mit Datei B verglichen und einstimmige Komponenten ersetzt
+            clear()
+
+            #
+            compare(wb)
+
             # Abrage ob das Programm beendet werden soll
             continue_request(wb , "\nWollen sie weiter machen [Y/n]? \n>  ")
         else:
             # Fehlermeldung falls es diesen Menüpunkt nicht gibt und läuft die Schleife nochmal durch
             clear()
+
+            #
             print("Den Befehl '{}'' gibt es nicht. Versuchen sie es noch einmal.\n".format(user_input))
+
+            #
             continue
+
+
 def main():
     clear()
+
     # DEBUG: Default Workbbok zum Debugen
     wb = openpyxl.load_workbook('Example/example_two.xlsx')
+
     # Fragt Workbook ab
-    # wb = ask_workbook()
+    # wb = ask_workbook("Geben sie ihren Pfad zur Datei an oder ziehen sie ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx.\n>  ")
+
     menu(wb)
+
 
 if __name__ == "__main__":
     main()
