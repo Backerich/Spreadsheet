@@ -51,7 +51,7 @@ def what_sheet(wb):
         exit()
     elif this_sheet == "":
         # wenn nur Enter gedrückt wird wird das aktive Sheet als default genommen
-        return wb.get_active_sheet()
+        return wb.get_active_sheet() 
     else: 
         try:
             # falls der Inputname existiert wird das ausgewählte Sheet benutzt
@@ -60,7 +60,7 @@ def what_sheet(wb):
                 # wenn nicht wird das Terminal aufgeräumt, eine Fehlermeldung ausgegeben und es wird erneut view abgefragt
                 clear()
                 print("\nDas Sheet {} existiert nicht. Versuchen sie es nochmal.\n".format(this_sheet))
-                view(wb) 
+                get_sheet(wb) 
 
 
 def list_sheets(wb):
@@ -98,7 +98,7 @@ def get_sheet(wb):
 
 def cell_value(sheet, row_first, column_first):
     # Ermittelt durch Koordinaten den Inhalt der ausgewählten Zelle
-    return sheet.cell(row=int(row_first), column=int(column_first)).value
+    return sheet.cell(row=int(row_first), column=int(column_first))
 
 
 def get_values(sheet, row_count, column_count):
@@ -110,7 +110,7 @@ def get_values(sheet, row_count, column_count):
         innerlist = []
 
         for column in range(1 , column_count + 1):
-            values = cell_value(sheet, row, column)
+            values = cell_value(sheet, row, column).value
 
             if values != None:
                 innerlist.append(values)
@@ -122,6 +122,50 @@ def get_values(sheet, row_count, column_count):
                 innerlist.append("")
         all_raw_rows.append(innerlist)
     return all_raw_rows, longest
+
+
+def copy():
+    print("\nEs wird ihnen eine Backupdatei erstellt.")
+    copy_name = input("Wie soll ihre Backupdatei heißen? (Excelendung erforderlich z.B. xlsx)\n>  ")
+    # path = first_workbook_name + " " + copy_name
+    # os.system("copy " + path if os.name == "nt" else "cp " + path)
+    return copy_name
+
+
+def compare_sheets(first_values, second_values, first_data, first_workbook):
+    first_sheet_values = {}
+    for first_row in first_values:
+        for first_item in first_row:
+            if first_item != '':
+                # So angeben row/column z.B 1,A = 1,1
+                position_row = first_values.index(first_row) + 1
+                position_column = first_row.index(first_item) + 1 
+
+                first_sheet_values[first_item] = (position_row, position_column)
+
+    for second_row in second_values:
+        for second_item in second_row:
+            if second_item == '':
+                pass
+            else:
+                line = re.compile(r'''
+                    ^\s*(?P<basic_item>[\w\d]+)\s*=\s*
+                    (?P<to_change>[\w\d]+)\s*$
+                    ''', re.X|re.M)
+
+                for match in line.finditer(second_item):
+                    basic = match.group('basic_item')
+                    change = match.group('to_change')
+
+                    for key, value in first_sheet_values.items():
+                        if basic == key:
+                            row = value[0]
+                            column = value[1]
+                            pos = cell_value(first_data, row, column).coordinate
+                            first_data[pos] = change
+                            first_data[pos].value
+    third_name = copy()
+    first_workbook.save(third_name)
 
 
 def sheets_to_compare(wb):
@@ -158,11 +202,11 @@ Das Spreadsheet was sie angeben wird als Ausgangsdatei verwendet!\n>  """)
 
         second_workbook = ask_workbook("""Geben sie ihren Pfad zur Datei an oder ziehen sie ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx.
 Das Spreadsheet was sie angeben wird als Vergleichsdatei verwendet!\n>  """)
-
         second_sheet = get_sheet(second_workbook)
+        print(second_sheet)
         clear()
 
-    return first_sheet, second_sheet
+    return first_sheet, second_sheet, first_workbook_ask, first_workbook
 
 
 def position(sheet):
@@ -186,12 +230,14 @@ def position(sheet):
 
 
 def compare(wb):
-    # Ermittelt die gewünschten Sheets
+    # Ermittelt die gewünschten Sheets und workbooks
     data = sheets_to_compare(wb)
     first_data = data[0]
     second_data = data[1]
+    first_workbook_name = data[2]
+    first_workbook = data[3]
 
-    # Ermittelt Maximale Reihe und Spalte des ersten Sheets
+    # Ermittelt Maximale Reihe und Spalte des ersten Sheets†
     first_max_sheet = max_sheet(first_data)
     first_max_row = first_max_sheet[0]
     first_max_column = first_max_sheet[1]
@@ -209,9 +255,12 @@ def compare(wb):
     del first_values[0]
     del second_values[0]
 
+    #
+    compare_sheets(first_values, second_values, first_data, first_workbook)
+
     # Test Unit
-    print(first_values)
-    print(second_values)
+    # print(first_values)
+    # print(second_values)
 
 
 def grid(values, longest):
@@ -278,7 +327,8 @@ def help():
     "all" : "Gibt eine tabellarische Übersicht des ausgewählten Sheets wieder",
     "view": "Gibt den Inhalt einer gewünschten Zelle wieder",
     "compare": "Schreibt eine neue Datei um Datensätze von B auf A zu überschreiben falls es überschneidungen gibt.",
-    "exit": "Velässt das Programm"}
+    "exit": "Velässt das Programm",
+    "github": "https://github.com/Backerich/Spreadsheet"}
 
     for key, value in funktionen.items():
         if len(key) > longest_key:
@@ -310,10 +360,10 @@ def menu(wb):
         print("Gib 'exit' ein um das Programm zu verlassen.")
 
         # Der Userinput um auf die einzelnen Menüpunkte zuzugreifen:
-        user_input = input(">  ").lower()
+        # user_input = input(">  ").lower()
 
         # DEBUG: Als default der Eingabe:
-        # user_input = 'compare'
+        user_input = 'compare'
         
         if user_input == 'exit':
             exit()
@@ -376,8 +426,7 @@ def main():
     clear()
 
     # DEBUG: Default Workbbok zum Debugen
-    wb = openpyxl.load_workbook('Example/example_two.xlsx')
-
+    wb = openpyxl.load_workbook('Example/example.xlsx')
     # Fragt Workbook ab
     # wb = ask_workbook("Geben sie ihren Pfad zur Datei an oder ziehen sie ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx.\n>  ")
 
