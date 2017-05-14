@@ -19,7 +19,7 @@ def clear():
 
 
 def ask_workbook(input_string):
-    workbook_input = input(input_string) # "Gib deinen Pfad zur Datei an oder zieh ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx).\n>  "
+    workbook_input = input(input_string).lower() # "Gib deinen Pfad zur Datei an oder zieh ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx).\n>  "
     if workbook_input == 'exit':
         exit()
     else:
@@ -35,7 +35,7 @@ def ask_workbook(input_string):
 
 def continue_request(wb, output):
     # Abfrage ob Programm beendet werden soll oder weiter laufen soll
-    continue_loop = input(output)
+    continue_loop = input(output).lower()
     if (continue_loop == 'n') or (continue_loop == 'exit'): # quit Abfrage
         exit()
     else:
@@ -44,7 +44,7 @@ def continue_request(wb, output):
 
 
 def what_sheet(wb):
-    this_sheet = input("Welches Sheet willst du benutzen? \n>  ") 
+    this_sheet = input("Welches Sheet willst du benutzen? \n>  ").lower()
 
     if this_sheet == 'exit':
         # quit Abfrage
@@ -125,23 +125,24 @@ def get_values(sheet, row_count, column_count):
 
 
 def copy():
-    print("\nEs wird ihnen eine Backupdatei erstellt.")
-    copy_name = input("Wie soll ihre Backupdatei heißen? (Excelendung erforderlich z.B. xlsx)\n>  ")
+    print("Es wird ihnen eine Ausgangskopie erstellt.")
+    copy_name = input("Wie soll ihre Ausgangskopie heißen? (Excelendung erforderlich z.B. xlsx)\n>  ").lower()
     # path = first_workbook_name + " " + copy_name
     # os.system("copy " + path if os.name == "nt" else "cp " + path)
-    return copy_name
+    return "Example/" + copy_name
 
 
 def compare_sheets(first_values, second_values, first_data, first_workbook):
-    first_sheet_values = {}
+    first_sheet_values = []
     for first_row in first_values:
         for first_item in first_row:
-            if first_item != '':
+            if first_item != '': # Wegen Dict kann velue nur ein wert haben
                 # So angeben row/column z.B 1,A = 1,1
-                position_row = first_values.index(first_row) + 1
-                position_column = first_row.index(first_item) + 1 
+                position_row = first_values.index(first_row)
+                position_column = first_row.index(first_item)
+                first_row[position_column] += "done"
 
-                first_sheet_values[first_item] = (position_row, position_column)
+                first_sheet_values.append([first_item, (position_row + 1, position_column + 1)])
 
     for second_row in second_values:
         for second_item in second_row:
@@ -157,19 +158,60 @@ def compare_sheets(first_values, second_values, first_data, first_workbook):
                     basic = match.group('basic_item')
                     change = match.group('to_change')
 
-                    for key, value in first_sheet_values.items():
-                        if basic == key:
-                            row = value[0]
-                            column = value[1]
-                            pos = cell_value(first_data, row, column).coordinate
-                            first_data[pos] = change
-                            first_data[pos].value
+                    for cell in first_sheet_values:
+                            item = cell[0]
+                            if basic == item:
+                                row = cell[1][0]
+                                column = cell[1][1]
+                                pos = cell_value(first_data, row, column).coordinate
+                                first_data[pos] = change
+                                print(pos)
+                                print(first_data[pos].value)
+
     third_name = copy()
     first_workbook.save(third_name)
 
 
+# def compare_sheets(first_values, second_values, first_data, first_workbook):
+#     first_sheet_values = {}
+#     print(first_values)
+#     for first_row in first_values:
+#         for first_item in first_row:
+#             if first_item != '': # Wegen Dict kann key nur ein wert haben key und value tauschen
+#                 # So angeben row/column z.B 1,A = 1,1
+#                 position_row = first_values.index(first_row) + 1
+#                 position_column = first_row.index(first_item) + 1
+
+#                 first_sheet_values[first_item] = (position_row, position_column)
+
+#     for second_row in second_values:
+#         for second_item in second_row:
+#             if second_item == '':
+#                 pass
+#             else:
+#                 line = re.compile(r'''
+#                     ^\s*(?P<basic_item>[\w\d]+)\s*=\s*
+#                     (?P<to_change>[\w\d]+)\s*$
+#                     ''', re.X|re.M)
+
+#                 for match in line.finditer(second_item):
+#                     basic = match.group('basic_item')
+#                     change = match.group('to_change')
+
+#                     for key, value in first_sheet_values.items():
+#                         if basic == key:
+#                             row = value[0]
+#                             column = value[1]
+#                             pos = cell_value(first_data, row, column).coordinate
+#                             first_data[pos] = change
+#                             first_data[pos].value
+#     print(first_sheet_values)
+#     third_name = copy()
+#     first_workbook.save(third_name)
+
+
 def sheets_to_compare(wb):
-    first_workbook_ask = input("Wollen sie ihr momentanes Spreadsheet als Ausgangsdatei verwenden? [Y/n]\n>  ")
+    first_workbook_ask = input("Wollen sie ihr momentanes Spreadsheet als Ausgangsdatei verwenden? [Y/n]\n>  ").lower()
     clear()
 
     first_sheet = None
@@ -183,6 +225,7 @@ def sheets_to_compare(wb):
 
         first_workbook = ask_workbook("""Geben sie ihren Pfad zur Datei an oder ziehen sie ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx.  
 Das Spreadsheet was sie angeben wird als Ausgangsdatei verwendet!\n>  """)
+        clear()
         first_sheet = get_sheet(first_workbook)
         clear()
     else:
@@ -200,17 +243,17 @@ Das Spreadsheet was sie angeben wird als Ausgangsdatei verwendet!\n>  """)
         clear()
     else:
 
-        second_workbook = ask_workbook("""Geben sie ihren Pfad zur Datei an oder ziehen sie ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx.
+        second_workbook = ask_workbook("""Geben sie ihren Pfad zur Datei an oder ziehen sie ihn rein per drag and drop(es sollte eine Exel datei sein z.B. .xlsx).\n
 Das Spreadsheet was sie angeben wird als Vergleichsdatei verwendet!\n>  """)
+        clear()
         second_sheet = get_sheet(second_workbook)
-        print(second_sheet)
         clear()
 
     return first_sheet, second_sheet, first_workbook_ask, first_workbook
 
 
 def position(sheet):
-    position_data = input("Geben sie die Positon ihrer Zelle an wie: 'Reihe, Spalte' (z.B. 2,1).\n>  ")
+    position_data = input("Geben sie die Positon ihrer Zelle an wie: 'Reihe, Spalte' (z.B. 2,1).\n>  ").lower()
 
     if position_data != 'exit':
         clear()
@@ -224,7 +267,7 @@ def position(sheet):
         # RE: Vergleicht das Muster mit dem Input und filtert je Reihe und Spalte heraus 
         # und gibt diese Werte and die 'cell_value' Methode weiter
         for match in line.finditer(position_data):
-            return cell_value(sheet, match.group('row'), match.group('column'))
+            return cell_value(sheet, match.group('row'), match.group('column')).value
     else:
         exit()
 
@@ -255,12 +298,8 @@ def compare(wb):
     del first_values[0]
     del second_values[0]
 
-    #
+    # Compares the sheets
     compare_sheets(first_values, second_values, first_data, first_workbook)
-
-    # Test Unit
-    # print(first_values)
-    # print(second_values)
 
 
 def grid(values, longest):
@@ -338,7 +377,7 @@ def help():
         print(key + " " * (longest_key - len(key)) + "| " + value)
 
     print("\n")
-    ask_function = input("Welche Funktion möchten sie erklärt haben?\n>  ")
+    ask_function = input("Welche Funktion möchten sie erklärt haben?\n>  ").lower()
 
     if ask_function == 'exit':
         exit()
@@ -385,6 +424,7 @@ def menu(wb):
 
             # Ersetzt das aktuelle Workbook mit dem neuen
             wb = ask_workbook("Geben sie ihren Pfad zur Datei an oder ziehen sie ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx.\n>  ")
+            clear()
         elif user_input == 'all':
             # Falls input 'all' wird eine tabellarische Übersicht des ausgewählten Sheets angezeigt
             clear()
