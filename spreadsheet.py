@@ -155,52 +155,56 @@ def compare_sheets(first_values, second_values, first_data, first_workbook):
             if first_item != '': # \s-_=".,;*'()!?
                 # Add position
                 item_list = first_item.split(' ')
-                # print(item_list)
-                for item in item_list:
-                    print(item_list)
-                    item = item.replace(",", "")
-                    print(item)
-                    # bla = item_list.index(item)
-                    # print(bla)
-                    position_row = first_values.index(first_row)
-                    # print(item_list[item])
-                    # bla = item_list[item]
-                    print(first_row)
-                    print(first_item)
-                    position_column = first_row.index(first_item)
+                for item_raw in item_list:
+                    item = item_raw.replace(",", "")
 
-                    first_sheet_values.append([item, (position_row + 1, position_column + 1)])
+                    position_row = first_values.index(first_row)
+                    position_column = first_row.index(first_item)
+                    position_string = item_list.index(item_raw)
+
+                    first_sheet_values.append([item, (position_row + 1, position_column + 1, position_string)])
+
                 first_row[position_column] += "done"
-    print(first_sheet_values)
+    # print(first_sheet_values)
 
     for second_row in second_values:
         for second_item in second_row:
+            # print(second_item)
             if second_item == '':
                 pass
             else:
-                line = re.compile(r'''
-                    ^\s*(?P<basic_item>[\w\d]+)\s*=\s*
-                    (?P<to_change>[\w\d]+)\s*$
-                    ''', re.X|re.M)
+                second_item = second_item.replace(" ", "").split("=")
 
-                for match in line.finditer(second_item):
-                    basic = match.group('basic_item')
-                    change = match.group('to_change')
+                for cell in first_sheet_values: # iter nicht immer über alle
+                    item = cell[0]
+                    if second_item[0] == item:
+                        # print(item)
+                        row = cell[1][0]
+                        # print(row)
+                        column = cell[1][1]
+                        # print(column)
+                        ############################ index = cell[1][2] ################################
+                        # print(index)
+                        pos = cell_value(first_data, row, column).coordinate
+                        # print(pos)
+                        value = first_data[pos].value
+                        # print(value)
+                        try:
+                            index = value.find(second_item[0])
+                            print(value)
+                            value = value.replace(second_item[0], "")
+                            print(value)
+                            value = value[:index] + second_item[1] + value[index:]
+                            print(value)
+                            first_data[pos] = value
+                            print(value)
+                        except IndexError:
+                            # del value[second_item[0]]
+                            # value.insert(index, second_item[0])
+                            print("Nothing")
+                        print(first_data[pos])
 
-                    for cell in first_sheet_values:
-                            item = cell[0]
-                            if basic == item:
-                                print(item)
-                                row = cell[1][0]
-                                print(row)
-                                column = cell[1][1]
-                                print(column)
-                                pos = cell_value(first_data, row, column).coordinate
-                                print(pos)
-                                first_data[pos] = change
-                                print(first_data[pos])
-
-    print(first_sheet_values)
+    # print(first_sheet_values)
     third_name = copy()
     first_workbook.save(third_name)
 
