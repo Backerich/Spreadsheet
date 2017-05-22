@@ -127,22 +127,51 @@ def get_values(sheet, row_count, column_count):
 def copy():
     print("Es wird ihnen eine Ausgangskopie erstellt.")
     copy_name = input("Wie soll ihre Ausgangskopie heißen? (Excelendung erforderlich z.B. xlsx)\n>  ").lower()
-    # path = first_workbook_name + " " + copy_name
-    # os.system("copy " + path if os.name == "nt" else "cp " + path)
     return "Example/" + copy_name
 
 
 def compare_sheets(first_values, second_values, first_data, first_workbook):
+    # first_sheet_values = []
+    # for first_row in first_values:
+    #     for first_item in first_row:
+    #         if first_item != '': # \s-_=".,;*'()!?
+    #             line = re.compile(r''' 
+    #             ^[\s\(\-.]*(?P<basic_change>[\w\d]+)[\s?!.,;\)-_:]*$
+    #             ''', re.X|re.M)
+
+    #             for match in line.finditer(first_item):
+    #                 item = match.group('basic_change')
+    #                 print(item)
+    #                 # Add position
+    #                 position_row = first_values.index(first_row)
+    #                 position_column = first_row.index(item)
+    #                 first_row[position_column] += "done"
+
+    #                 first_sheet_values.append([item, (position_row + 1, position_column + 1)])
+    # print(first_values)
     first_sheet_values = []
     for first_row in first_values:
         for first_item in first_row:
-            if first_item != '': # Wegen Dict kann velue nur ein wert haben
-                # So angeben row/column z.B 1,A = 1,1
-                position_row = first_values.index(first_row)
-                position_column = first_row.index(first_item)
-                first_row[position_column] += "done"
+            if first_item != '': # \s-_=".,;*'()!?
+                # Add position
+                item_list = first_item.split(' ')
+                # print(item_list)
+                for item in item_list:
+                    print(item_list)
+                    item = item.replace(",", "")
+                    print(item)
+                    # bla = item_list.index(item)
+                    # print(bla)
+                    position_row = first_values.index(first_row)
+                    # print(item_list[item])
+                    # bla = item_list[item]
+                    print(first_row)
+                    print(first_item)
+                    position_column = first_row.index(first_item)
 
-                first_sheet_values.append([first_item, (position_row + 1, position_column + 1)])
+                    first_sheet_values.append([item, (position_row + 1, position_column + 1)])
+                first_row[position_column] += "done"
+    print(first_sheet_values)
 
     for second_row in second_values:
         for second_item in second_row:
@@ -161,53 +190,19 @@ def compare_sheets(first_values, second_values, first_data, first_workbook):
                     for cell in first_sheet_values:
                             item = cell[0]
                             if basic == item:
+                                print(item)
                                 row = cell[1][0]
+                                print(row)
                                 column = cell[1][1]
+                                print(column)
                                 pos = cell_value(first_data, row, column).coordinate
-                                first_data[pos] = change
                                 print(pos)
-                                print(first_data[pos].value)
+                                first_data[pos] = change
+                                print(first_data[pos])
 
+    print(first_sheet_values)
     third_name = copy()
     first_workbook.save(third_name)
-
-
-# def compare_sheets(first_values, second_values, first_data, first_workbook):
-#     first_sheet_values = {}
-#     print(first_values)
-#     for first_row in first_values:
-#         for first_item in first_row:
-#             if first_item != '': # Wegen Dict kann key nur ein wert haben key und value tauschen
-#                 # So angeben row/column z.B 1,A = 1,1
-#                 position_row = first_values.index(first_row) + 1
-#                 position_column = first_row.index(first_item) + 1
-
-#                 first_sheet_values[first_item] = (position_row, position_column)
-
-#     for second_row in second_values:
-#         for second_item in second_row:
-#             if second_item == '':
-#                 pass
-#             else:
-#                 line = re.compile(r'''
-#                     ^\s*(?P<basic_item>[\w\d]+)\s*=\s*
-#                     (?P<to_change>[\w\d]+)\s*$
-#                     ''', re.X|re.M)
-
-#                 for match in line.finditer(second_item):
-#                     basic = match.group('basic_item')
-#                     change = match.group('to_change')
-
-#                     for key, value in first_sheet_values.items():
-#                         if basic == key:
-#                             row = value[0]
-#                             column = value[1]
-#                             pos = cell_value(first_data, row, column).coordinate
-#                             first_data[pos] = change
-#                             first_data[pos].value
-#     print(first_sheet_values)
-#     third_name = copy()
-#     first_workbook.save(third_name)
 
 
 def sheets_to_compare(wb):
