@@ -6,77 +6,8 @@ import sys
 import os
 import re
 
-strings_german = [
-        "exit", # 0
-        "help", # 1
-        "edit", # 2
-        "compare", # 3 
-        "view", # 4
-        "all", # 5
-        "Geben sie ihren Pfad zur Datei an oder ziehen sie ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx. ", # 6
-        "Wollen sie weiter machen [Y/n]?", # 7
-        "Ändere dein workbook.", # 8
-        "Wird noch implimentiert.", # 9
-        "Welche Funktion möchten sie erklärt haben?", # 10
-        "Diese Zelle gibt es nicht bitte versuchen sie es nochmal.", # 11
-        "Geben sie die Positon ihrer Zelle an wie: 'Reihe, Spalte' (z.B. 2,1).", # 12
-        "Das Spreadsheet was sie angeben wird als Vergleichsdatei verwendet!", # 13
-        "Wollen sie ihre momentane Datei als Vergleichsdatei verwenden? [Y/n]", # 14 ###### Wird nicht benutzt ########
-        "Das Spreadsheet was sie angeben wird als Ausgangsdatei verwenden? [Y/n]", #15
-        "Wollen sie ihre momentane Datei verwenden? [Y/n]", # 16
-        "Wie soll ihre Ausgangskopie heißen? (Excelendung erforderlich z.B. xlsx)", # 17
-        "Es wird ihnen eine Ausgangskopie erstellt.", # 18
-        "Dieses Sheet hat keine Spalte oder Zeilen!", # 19
-        "Versuch es noch einmal.", # 20
-        "Welches Sheet willst du benutzen?", # 21
-        "Diser Pfad exsistiert nicht. Versuch es nochmal.", # 22
-        "Den Befehl '{}' gibt es nicht. Versuchen sie es noch einmal.", # 23
-        "Gib '{}' ein um einen überblick von deinem Spreadsheet zu erhalten.", # 24
-        "Gib '{}' ein um bestimmt Zeilen zu inspizieren.", # 25
-        "Gib '{}' ein um Datensätze der ersten Datei mit Datensätzen einer zweiten zu ersetzen.", # 26
-        "Gib '{}' ein um dein workbook zu ändern.", # 27
-        "Gib '{}' ein wenn du hilfe brauchst.", #28
-        "Gib '{}' ein um das Programm zu verlassen.", #29
-        "github", # 30
-        "Gibt eine tabellarische Übersicht des ausgewählten Sheets wieder", #31
-        "Gibt den Inhalt einer gewünschten Zelle wieder", #32
-        "Schreibt eine neue Datei um Datensätze von B auf A zu überschreiben falls es überschneidungen gibt.", #33
-        "Velässt das Programm", # 34
-        "https://github.com/Backerich/Spreadsheet", #35
-        "Ihre Zelle beinhaltet '{}'.", # 36
-        "Sheet Nummer {}: {}", #37
-        "Das Sheet {} existiert nicht. Versuchen sie es nochmal." # 38
-]
-
-strings_englisch = [
-        "exit", # 0
-        "help", # 1
-        "edit", # 2
-        "compare", # 3
-        "view", # 4
-        "all", # 5
-        "column", # 6
-        "row", # 7
-        "done", # 8
-        "Example/", # 9
-]
-
-strings_special = [
-        "https://github.com/Backerich/Spreadsheet", # 0
-        "", # 1
-        "__main__", # 2
-        "> ", # 3
-        "\n", # 4
-        "n", # 5
-        " ", # 6
-        "| ", # 7
-        "|", # 8
-        "=", # 9
-        "cls", # 10
-        "nt", # 11
-        "clear", #12
-        "," # 13
-]
+strings_german = []
+strings_englisch = []
 
 def exit():
     # Verlässt das Programm
@@ -85,11 +16,11 @@ def exit():
 
 def clear():
     # Räumt den Terminal Output auf
-    os.system(strings_special[10] if os.name == strings_special[11] else strings_special[12])
+    os.system("cls" if os.name == "nt" else "clear")
 
 
 def ask_workbook(input_string):
-    string = strings_german[6] + input_string + strings_special[4] + strings_special[3]
+    string = strings_german[6] + input_string + "\n" + "> "
     workbook_input = input(string).lower()
     if workbook_input == strings_german[0]:
         exit()
@@ -101,14 +32,14 @@ def ask_workbook(input_string):
         except FileNotFoundError:
             # Falls nicht wird eine Fehlermeldung ausgegeben und nochmal abgefragt
             clear()
-            print(strings_german[22] + strings_special[4])
+            print(strings_german[22] + "\n")
             ask_workbook(input_string)
 
 
 def continue_request(wb):
     # Abfrage ob Programm beendet werden soll oder weiter laufen soll
-    continue_loop = input(strings_special[4] + strings_german[7] + strings_special[4] + strings_special[3]).lower()
-    if (continue_loop == strings_special[5]) or (continue_loop == strings_german[0]):
+    continue_loop = input("\n" + strings_german[7] + "\n" + "> ").lower()
+    if (continue_loop == "n") or (continue_loop == strings_german[0]):
         exit()
 
     else:
@@ -117,12 +48,12 @@ def continue_request(wb):
 
 
 def what_sheet(wb):
-    this_sheet = input(strings_german[21] + strings_special[4] + strings_special[3]).lower()
+    this_sheet = input(strings_german[21] + "\n" + "> ").lower()
 
     if this_sheet == strings_german[0]:
         exit()
 
-    elif this_sheet == strings_special[1]:
+    elif this_sheet == "":
         # Wenn nur Enter gedrückt wird wird das aktive Sheet als default genommen
         return wb.get_active_sheet() 
 
@@ -133,7 +64,7 @@ def what_sheet(wb):
         except KeyError:
                 # Wenn nicht wird das Terminal aufgeräumt, eine Fehlermeldung ausgegeben und es wird erneut view abgefragt
                 clear()
-                print(strings_special[4] + strings_german[38] + strings_special[4].format(this_sheet))
+                print("\n" + strings_german[38] + "\n".format(this_sheet))
                 get_sheet(wb) 
 
 
@@ -199,7 +130,7 @@ def get_values(sheet, row_count, column_count):
 
             else:
                 # Abgrenzungen
-                innerlist.append(strings_special[1])
+                innerlist.append("")
 
         # Fügt alle zusammen
         all_raw_rows.append(innerlist)
@@ -209,7 +140,7 @@ def get_values(sheet, row_count, column_count):
 def copy():
     # Fragt nach dem Namen der Datei C
     print(strings_german[18])
-    copy_name = input(strings_german[17] + strings_special[4] + strings_special[3]).lower().strip()
+    copy_name = input(strings_german[17] + "\n" + "> ").lower().strip()
 
     if copy_name == strings_german[0]:
         exit()
@@ -217,7 +148,7 @@ def copy():
     else:
 
         # Gibt den Pfad zurück
-        return strings_englisch[9] + copy_name
+        return "Example/" + copy_name
 
 
 def compare_sheets(first_values, second_values, first_data, first_workbook):
@@ -225,14 +156,14 @@ def compare_sheets(first_values, second_values, first_data, first_workbook):
 
     for first_row in first_values:
         for first_item in first_row:
-            if first_item != strings_special[1]:
+            if first_item != "":
 
                 # Teilt die Ausgangszelle per Leerzeichen
-                item_list = first_item.split(strings_special[6]) # RE eher angebracht
+                item_list = first_item.split(" ") # RE eher angebracht
 
                 for item_raw in item_list:
                     # Filtert Kommata heraus
-                    item = item_raw.replace(strings_special[13], strings_special[1]) # RE eher angebracht
+                    item = item_raw.replace(",", "") # RE eher angebracht
 
                     # Ermittelt die Postion der Reihe, der Spalte und die Position im String
                     position_row = first_values.index(first_row)
@@ -243,18 +174,18 @@ def compare_sheets(first_values, second_values, first_data, first_workbook):
                     first_sheet_values.append([item, (position_row + 1, position_column + 1, position_string)])
 
                 # Setzt "done" ans ende des benutzten Objektes damit selbes Item mit anderen Koordinaten existieren kann
-                first_row[position_column] += strings_englisch[8]
+                first_row[position_column] += "done"
 
     for second_row in second_values:
         for second_item in second_row:
 
             # Wenn item Leer ist weiter machen
-            if second_item == strings_special[1]:
+            if second_item == "":
                 pass
 
             else:
                 # Löscht Leerzeichen und teilt Werte auf durch "="
-                second_item = second_item.replace(strings_special[6], strings_special[1]).split(strings_special[9])
+                second_item = second_item.replace(" ", "").split("=")
 
                 for cell in first_sheet_values: # iter nicht immer über alle
                     item = cell[0]
@@ -274,26 +205,26 @@ def compare_sheets(first_values, second_values, first_data, first_workbook):
                         # Gucken ob 'find' nicht den oberen Abschnitt der Funktion ersetzt #
                         ####################################################################
 
-                        try: # Checken ob Errorhandling nötig
-                            # Sucht Vergleichs datei in Ausgangsdatei
-                            index = value.find(second_item[0])
+                        # Sucht Vergleichs datei in Ausgangsdatei
+                        index = value.find(second_item[0])
 
+                        try: # Checken ob Errorhandling nötig
                             # Löscht Vergleichsdatei in Ausgangsdatie
-                            value = value.replace(second_item[0], strings_special[1])
+                            value = value.replace(second_item[0], "")
 
                             # Setzt String wieder zusammen
                             value = value[:index] + second_item[1] + value[index:]
+
                             first_data[pos] = value
                         except IndexError:
                             pass
-
     # Erstellt kopie von von Datei A und speichert es in Datei C
     third_name = copy()
     first_workbook.save(third_name)
 
 
 def sheets_to_compare(wb): # Überlegung ob nötig
-    user_workbook = input(strings_german[16] + strings_special[4] + strings_special[3]).lower()
+    user_workbook = input(strings_german[16] + "\n" + "> ").lower()
 
     sheet = None
     workbook = None
@@ -301,11 +232,11 @@ def sheets_to_compare(wb): # Überlegung ob nötig
     if user_workbook == strings_german[0]:
         exit()
 
-    elif user_workbook == strings_special[5]:
+    elif user_workbook == "n":
         # Erfolgt wenn anderes Workbook genutzt werden soll und ermittelt das Worksheet
-        workbook = ask_workbook(strings_special[4] + strings_german[15])
+        workbook = ask_workbook("\n" + strings_german[15])
         clear()
-        sheet = get_sheet(first_workbook)
+        sheet = get_sheet(workbook)
         clear()
 
     else:
@@ -319,7 +250,7 @@ def sheets_to_compare(wb): # Überlegung ob nötig
 
 
 def position(sheet):
-    position_data = input(strings_german[12] + strings_special[4] + strings_special[3]).lower()
+    position_data = input(strings_german[12] + "\n" + "> ").lower()
 
     if position_data == strings_german[0]:
         exit()
@@ -335,7 +266,7 @@ def position(sheet):
 
         # Ermittelt die Werte durch RE und setzt sie in die Funktion ein um den Zelleninhalt heraus zu bekommen
         for match in line.finditer(position_data):
-            return cell_value(sheet, match.group(strings_englisch[7]), match.group(strings_englisch[6])).value
+            return cell_value(sheet, match.group("row"), match.group("column")).value
 
 
 def compare(wb):
@@ -347,7 +278,7 @@ def compare(wb):
     first_workbook = data_first[2]
 
     # Zweites Worksheet
-    data_second = sheets_to_compare(wb)
+    data_second = sheets_to_compare(wb) # BUG: Falsche Strings
     second_data = data_second[0]
 
     # Ermittelt Maximale Reihe und Spalte des ersten Worksheets
@@ -383,17 +314,17 @@ def grid(values, longest):
             value_length = longest + 1 - len(str(item))
 
             # Setzt die Reihe zusammen
-            raw_temp.append(str(item) + strings_special[6] * value_length + strings_special[8])
+            raw_temp.append(str(item) + " " * value_length + "|")
 
         # Fügt die Reihe dem Raster hinzu
         string_rows.append(raw_temp)
 
     # Fügt Reihenzahlen hinzu und gibt die Tabelle aus
     for row in string_rows:
-        string_temp = strings_special[1]
+        string_temp = ""
 
         # Ermittelt die Reihenzahl
-        string_temp += str(string_rows.index(row)) + strings_special[7]
+        string_temp += str(string_rows.index(row)) + "| "
 
         for i in range(0, len(row)):
             # Fügt die Reihenzahlen und die restliche Reihe zusammen
@@ -446,7 +377,7 @@ def help():
     strings_german[4]: strings_german[32],
     strings_german[3]: strings_german[33],
     strings_german[0]: strings_german[34],
-    strings_german[30]: strings_special[0]}
+    strings_german[30]: "https://github.com/Backerich/Spreadsheet"}
 
     # Ermittelt den längsten Key
     longest_key = 0
@@ -456,10 +387,10 @@ def help():
 
     # Gibt die Tabelle aus mit den Funktionsnamen und Beschreibungen
     for key, value in funktionen.items():
-        print(key + strings_special[6] * (longest_key - len(key)) + strings_special[7] + value)
+        print(key + " " * (longest_key - len(key)) + "| " + value)
 
     # Fragt nach der Funktion die weiter Erläutert werden soll
-    ask_function = input(strings_special[4] + strings_german[10] + strings_special[4] + strings_special[3]).lower()
+    ask_function = input("\n" + strings_german[10] + "\n" + "> ").lower()
 
     if ask_function == strings_german[0]:
         exit()
@@ -484,7 +415,7 @@ def menu(wb):
         print(strings_german[29].format(strings_german[0]))
 
         # Benutzerinput für das Menü
-        user_input = input(strings_special[3]).lower()
+        user_input = input("> ").lower()
 
         # DEBUG: Als default der Eingabe:
         # user_input = strings_german[3]
@@ -501,8 +432,8 @@ def menu(wb):
         elif user_input == strings_german[2]:
             # Zum ändern des aktuellen workbooks
             clear()
-            print(strings_german[8] + strings_special[4])
-            wb = ask_workbook(strings_special[1])
+            print(strings_german[8] + "\n")
+            wb = ask_workbook("")
             clear()
 
         elif user_input == strings_german[5]:
@@ -526,22 +457,52 @@ def menu(wb):
         else:
             # ERROR: Wenn es die Funktion nicht gibt
             clear()
-            print(strings_german[23].format(user_input) + strings_special[4])
+            print(strings_german[23].format(user_input) + "\n")
             continue
 
 
+def language():
+    print("Type 'ger' for german.")
+    print("Type 'eng' for englisch.")
+    ask_language = input("Which language should your programm use?\n> ")
+
+    if ask_language == 'exit':
+        exit()
+
+    elif ask_language == 'ger':
+        with open("Languages/german", "r") as file:
+            for line in file:
+                full_line = line.replace("\n", "")
+                strings_german.append(full_line)
+
+    elif ask_language == 'eng':
+        with open("Languages/englisch", "r") as file:
+            for line in file:
+                full_line = line.replace("\n", "")
+                strings_englisch.append(full_line)
+
+    else:
+        clear()
+        print("That language does not exist")
+        language()
+
+
 def main():
+    clear()
+
+    # Fragt Welche Sprache
+    language()
     clear()
 
     # DEBUG: Default Workbbok zum Debuggen
     # wb = openpyxl.load_workbook('Example/example.xlsx')
 
     # Fragt nach dem workbook
-    wb = ask_workbook(strings_special[1])
+    wb = ask_workbook("") # BUG: Wenn falsch kann compare nicht weiter arbeiten
 
     menu(wb)
 
 
-if __name__ == strings_special[2]:
+if __name__ == "__main__":
     main()
 

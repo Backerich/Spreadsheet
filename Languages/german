@@ -1,0 +1,39 @@
+exit
+help
+edit
+compare
+view
+all
+Geben sie ihren Pfad zur Datei an oder ziehen sie ihn rein per drag and drop(es sollte eine Exel datei sein also z.B. .xlsx.) 
+Wollen sie weiter machen [Y/n]?
+Ändere dein workbook.,
+Wird noch implementiert.
+Welche Funktion möchten sie erklärt haben?
+Diese Zelle gibt es nicht bitte versuchen sie es nochmal.
+Geben sie die Position ihrer Zelle an wie: 'Reihe, Spalte' (z.B. 2,1).
+Das Spreadsheet was sie angeben wird als Vergleichsdatei verwendet!
+Wollen sie ihre momentane Datei als Vergleichsdatei verwenden? [Y/n]“
+Das Spreadsheet was sie angeben wird als Ausgangsdatei verwenden? [Y/n]
+Wollen sie ihre momentane Datei verwenden? [Y/n]
+Wie soll ihre Ausgangskopie heißen? (Excelendung erforderlich z.B. xlsx)
+Es wird ihnen eine Ausgangskopie erstellt.
+Dieses Sheet hat keine Spalte oder Zeilen!
+Versuch es noch einmal.
+Welches Sheet willst du benutzen?
+Dieser Pfad existiert nicht. Versuch es nochmal.
+Den Befehl '{}' gibt es nicht. Versuchen sie es noch einmal.
+Gib '{}' ein um einen überblick von deinem Spreadsheet zu erhalten.
+Gib '{}' ein um bestimmt Zeilen zu inspizieren.
+Gib '{}' ein um Datensätze der ersten Datei mit Datensätzen einer zweiten zu ersetzen.
+Gib '{}' ein um dein workbook zu ändern.
+Gib '{}' ein wenn du Hilfe brauchst.
+Gib '{}' ein um das Programm zu verlassen.
+Github
+Gibt eine tabellarische Übersicht des ausgewählten Sheets wieder
+Gibt den Inhalt einer gewünschten Zelle wieder
+Schreibt eine neue Datei um Datensätze von B auf A zu überschreiben falls es Überschneidungen gibt.
+Verlässt das Programm
+https://github.com/Backerich/Spreadsheet
+Ihre Zelle beinhaltet '{}'.
+Sheet Nummer {}: {}
+Das Sheet {} existiert nicht. Versuchen sie es nochmal.
