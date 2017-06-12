@@ -5,9 +5,9 @@ import openpyxl
 import sys
 import os
 import re
+import locale
 
-strings_german = []
-strings_englisch = []
+strings_language = []
 
 def exit():
     # Verlässt das Programm
@@ -20,26 +20,40 @@ def clear():
 
 
 def ask_workbook(input_string):
-    string = strings_german[6] + input_string + "\n" + "> "
-    workbook_input = input(string).lower()
-    if workbook_input == strings_german[0]:
-        exit()
+    while True:
+        clear()
+        string = strings_language[6] + input_string + "\n" + "> "
 
-    else:
         try:
-            # Falls es den Path gibt verwendet er nun dieses Workbook
-            return openpyxl.load_workbook(workbook_input)
-        except FileNotFoundError:
-            # Falls nicht wird eine Fehlermeldung ausgegeben und nochmal abgefragt
-            clear()
-            print(strings_german[22] + "\n")
-            ask_workbook(input_string)
+            workbook_input = input(string).lower().strip()
+        except KeyboardInterrupt:
+            exit()
+
+        if workbook_input == strings_language[0]:
+            exit()
+
+        else:
+            try:
+                # Falls es den Path gibt verwendet er nun dieses Workbook
+                return openpyxl.load_workbook(workbook_input)
+            except FileNotFoundError:
+                clear()
+                ask_continue = input("This File does not exist. Do you want to continue? [Y/n]\n> ").lower().strip()
+
+                if ask_continue == 'n' or 'exit':
+                    exit()
+                else:
+                    continue
 
 
 def continue_request(wb):
     # Abfrage ob Programm beendet werden soll oder weiter laufen soll
-    continue_loop = input("\n" + strings_german[7] + "\n" + "> ").lower()
-    if (continue_loop == "n") or (continue_loop == strings_german[0]):
+    try:
+        continue_loop = input("\n" + strings_language[7] + "\n" + "> ").lower().strip()
+    except KeyboardInterrupt:
+        exit()
+
+    if (continue_loop == "n") or (continue_loop == strings_language[0]):
         exit()
 
     else:
@@ -48,9 +62,12 @@ def continue_request(wb):
 
 
 def what_sheet(wb):
-    this_sheet = input(strings_german[21] + "\n" + "> ").lower()
+    try:
+        this_sheet = input(strings_language[21] + "\n" + "> ").lower().strip()
+    except KeyboardInterrupt:
+        exit()
 
-    if this_sheet == strings_german[0]:
+    if this_sheet == strings_language[0]:
         exit()
 
     elif this_sheet == "":
@@ -64,7 +81,7 @@ def what_sheet(wb):
         except KeyError:
                 # Wenn nicht wird das Terminal aufgeräumt, eine Fehlermeldung ausgegeben und es wird erneut view abgefragt
                 clear()
-                print("\n" + strings_german[38] + "\n".format(this_sheet))
+                print("\n" + strings_language[38] + "\n".format(this_sheet))
                 get_sheet(wb) 
 
 
@@ -76,12 +93,12 @@ def list_sheets(wb):
         sheets = wb.get_sheet_names()
     except AttributeError:
         clear()
-        print(strings_german[20])
+        print(strings_language[20])
         menu(wb)
     counter = 1
 
     for string in sheets:
-        print(strings_german[37].format(counter, string))
+        print(strings_language[37].format(counter, string))
 
         # counter zur Orientierung des Endusers
         counter += 1
@@ -93,7 +110,7 @@ def max_sheet(sheet):
         return sheet.max_row, sheet.max_column
     except AttributeError:
         # Falls es keine Reihe oder Spalte gibt wird eine Fahlermeldung ausgegeben
-        print(strings_german[19])
+        print(strings_language[19])
 
 
 def get_sheet(wb):
@@ -139,10 +156,13 @@ def get_values(sheet, row_count, column_count):
 
 def copy():
     # Fragt nach dem Namen der Datei C
-    print(strings_german[18])
-    copy_name = input(strings_german[17] + "\n" + "> ").lower().strip()
+    print(strings_language[18])
+    try:
+        copy_name = input(strings_language[17] + "\n" + "> ").lower().strip()
+    except KeyboardInterrupt:
+        exit()
 
-    if copy_name == strings_german[0]:
+    if copy_name == strings_language[0]:
         exit()
 
     else:
@@ -224,17 +244,20 @@ def compare_sheets(first_values, second_values, first_data, first_workbook):
 
 
 def sheets_to_compare(wb): # Überlegung ob nötig
-    user_workbook = input(strings_german[16] + "\n" + "> ").lower()
+    try:
+        user_workbook = input(strings_language[16] + "\n" + "> ").lower().strip()
+    except KeyboardInterrupt:
+        exit()
 
     sheet = None
     workbook = None
 
-    if user_workbook == strings_german[0]:
+    if user_workbook == strings_language[0]:
         exit()
 
     elif user_workbook == "n":
         # Erfolgt wenn anderes Workbook genutzt werden soll und ermittelt das Worksheet
-        workbook = ask_workbook("\n" + strings_german[15])
+        workbook = ask_workbook("\n" + strings_language[15])
         clear()
         sheet = get_sheet(workbook)
         clear()
@@ -250,23 +273,32 @@ def sheets_to_compare(wb): # Überlegung ob nötig
 
 
 def position(sheet):
-    position_data = input(strings_german[12] + "\n" + "> ").lower()
+    while True:
+        try:
+            position_data = input(strings_language[12] + "\n" + "> ").lower().strip()
+        except KeyboardInterrupt:
+            exit()
 
-    if position_data == strings_german[0]:
-        exit()
+        if position_data == strings_language[0]:
+            exit()
 
-    else:
-        clear()
+        else:
+            clear()
+            position_data = position_data.split(",")
 
-        # RE: Muster zum filtern der Koordinaten 
-        line = re.compile(r'''
-        ^(?P<row>[\d]+),\s*
-        (?P<column>[\d]+)$
-        ''', re.X|re.M)
+            try:
+                strings_language[36].format(position_data)
+                print(strings_language[36].format(cell_value(sheet, position_data[0], position_data[1]).value))
 
-        # Ermittelt die Werte durch RE und setzt sie in die Funktion ein um den Zelleninhalt heraus zu bekommen
-        for match in line.finditer(position_data):
-            return cell_value(sheet, match.group("row"), match.group("column")).value
+            except (ValueError, IndexError):
+                clear()
+                ask_continue = input("This Position does not exist. Do you want to continue? [Y/n]\n> ").lower().strip()
+
+                if ask_continue == 'n' or 'exit':
+                    exit()
+                else:
+                    continue
+                
 
 
 def compare(wb):
@@ -359,25 +391,18 @@ def view(wb):
     sheet = get_sheet(wb)
     clear()
 
-    # Ermittelt den Wert der Zelle
-    position_data = position(sheet)
-
-    if position_data != None:
-        # Gibt den Inhalt der Zelle aus
-        return strings_german[36].format(position_data)
-    else:
-        # ERROR: Wenn der Inhalt None ist
-        return strings_german[11]
+    # Ermittelt den Wert der Zelle und gibt ihn aus
+    position(sheet)
 
 
 def help():
     # Die einzelnen Funktionen und ihre Beschreibung
     funktionen = {
-    strings_german[5] : strings_german[31],
-    strings_german[4]: strings_german[32],
-    strings_german[3]: strings_german[33],
-    strings_german[0]: strings_german[34],
-    strings_german[30]: "https://github.com/Backerich/Spreadsheet"}
+    strings_language[5] : strings_language[31],
+    strings_language[4]: strings_language[32],
+    strings_language[3]: strings_language[33],
+    strings_language[0]: strings_language[34],
+    strings_language[30]: "https://github.com/Backerich/Spreadsheet"}
 
     # Ermittelt den längsten Key
     longest_key = 0
@@ -390,15 +415,18 @@ def help():
         print(key + " " * (longest_key - len(key)) + "| " + value)
 
     # Fragt nach der Funktion die weiter Erläutert werden soll
-    ask_function = input("\n" + strings_german[10] + "\n" + "> ").lower()
+    try:
+        ask_function = input("\n" + strings_language[10] + "\n" + "> ").lower().strip()
+    except KeyboardInterrupt:
+        exit()
 
-    if ask_function == strings_german[0]:
+    if ask_function == strings_language[0]:
         exit()
 
     else:
         # Gibt theoretisch die weitere Beschreibung aus
         clear()
-        print(strings_german[9])
+        print(strings_language[9])
 
 
 def menu(wb):
@@ -407,48 +435,51 @@ def menu(wb):
 
     while True:
         # Alle möglichen Funktionen des Programmes
-        print(strings_german[24].format(strings_german[5]))
-        print(strings_german[25].format(strings_german[4]))
-        print(strings_german[26].format(strings_german[3]))
-        print(strings_german[27].format(strings_german[2]))
-        print(strings_german[28].format(strings_german[1]))
-        print(strings_german[29].format(strings_german[0]))
+        print(strings_language[24].format(strings_language[5]))
+        print(strings_language[25].format(strings_language[4]))
+        print(strings_language[26].format(strings_language[3]))
+        print(strings_language[27].format(strings_language[2]))
+        print(strings_language[28].format(strings_language[1]))
+        print(strings_language[29].format(strings_language[0]))
 
         # Benutzerinput für das Menü
-        user_input = input("> ").lower()
-
-        # DEBUG: Als default der Eingabe:
-        # user_input = strings_german[3]
-        
-        if user_input == strings_german[0]:
+        try:
+            user_input = input("> ").lower().strip()
+        except KeyboardInterrupt:
             exit()
 
-        elif user_input == strings_german[4]:
+        # DEBUG: Als default der Eingabe:
+        # user_input = strings_language[3]
+        
+        if user_input == strings_language[0]:
+            exit()
+
+        elif user_input == strings_language[4]:
             # Zum betrachten des Wertes einer einzelner Zellen 
             clear()
-            print(view(wb))
+            view(wb)
             continue_request(wb)
 
-        elif user_input == strings_german[2]:
+        elif user_input == strings_language[2]:
             # Zum ändern des aktuellen workbooks
             clear()
-            print(strings_german[8] + "\n")
+            print(strings_language[8] + "\n")
             wb = ask_workbook("")
             clear()
 
-        elif user_input == strings_german[5]:
+        elif user_input == strings_language[5]:
             # Gibt den gesammten Inhalt des Sheets in einer Tabelle aus
             clear()
             all(wb)
             continue_request(wb)
 
-        elif user_input == strings_german[3]:
+        elif user_input == strings_language[3]:
             # Datei A wird mit Datei B verglichen und einstimmige Komponenten in Datei C geschrieben und ersetzt
             clear()
             compare(wb)
             continue_request(wb)
 
-        elif user_input == strings_german[1]:
+        elif user_input == strings_language[1]:
             # Beschreibt die Funktionen des Programmes
             clear()
             help()
@@ -457,38 +488,52 @@ def menu(wb):
         else:
             # ERROR: Wenn es die Funktion nicht gibt
             clear()
-            print(strings_german[23].format(user_input) + "\n")
+            print(strings_language[23].format(user_input) + "\n")
             continue
 
 
 def language():
-    print("Type 'ger' for german.")
-    print("Type 'eng' for englisch.")
-    ask_language = input("Which language should your programm use?\n> ")
-
-    if ask_language == 'exit':
-        exit()
-
-    elif ask_language == 'ger':
-        with open("Languages/german", "r") as file:
-            for line in file:
-                full_line = line.replace("\n", "")
-                strings_german.append(full_line)
-
-    elif ask_language == 'eng':
-        with open("Languages/englisch", "r") as file:
-            for line in file:
-                full_line = line.replace("\n", "")
-                strings_englisch.append(full_line)
-
-    else:
+    locale.getdefaultlocale()
+    while True:
         clear()
-        print("That language does not exist")
-        language()
+        print("Type 'ger' for german.")
+        print("Type 'eng' for englisch.")
 
+        try:
+            ask_language = input("Which language should your programm use?\n> ").lower().strip()
+        except KeyboardInterrupt:
+            exit()
+
+        if ask_language == 'exit':
+            exit()
+
+        elif ask_language == 'ger':
+            # Liest die Deutschen Strings aus
+            with open("Languages/german", "r") as file:
+                for line in file:
+                    full_line = line.replace("\n", "")
+                    strings_language.append(full_line)
+            break
+
+        elif ask_language == 'eng':
+            # Liest die Englischen Strings aus
+            with open("Languages/englisch", "r") as file:
+                for line in file:
+                    full_line = line.replace("\n", "")
+                    strings_language.append(full_line)
+            break
+
+        else:
+            clear()
+            ask_continue = input("This language does not exist. Do you want to continue? [Y/n]\n> ").lower().strip()
+            if ask_continue != 'exit' or 'n':
+                continue
+            else:
+                exit()
+            
 
 def main():
-    clear()
+    # clear()
 
     # Fragt Welche Sprache
     language()
@@ -500,6 +545,7 @@ def main():
     # Fragt nach dem workbook
     wb = ask_workbook("") # BUG: Wenn falsch kann compare nicht weiter arbeiten
 
+    # Ruft das Menü auf mit allen Funktionen des Programmes
     menu(wb)
 
 
