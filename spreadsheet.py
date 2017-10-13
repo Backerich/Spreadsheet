@@ -62,8 +62,10 @@ def continue_request(wb):
 
 
 def what_sheet(wb):
+    this_sheet = None
+
     try:
-        this_sheet = input(strings_language[21] + "\n" + "> ").lower().strip()
+        this_sheet = input(strings_language[21] + "\n" + "> ").strip()  # .lower() before .strip()
     except KeyboardInterrupt:
         exit()
 
@@ -540,10 +542,10 @@ def main():
     clear()
 
     # DEBUG: Default Workbbok zum Debuggen
-    # wb = openpyxl.load_workbook('Example/example.xlsx')
+    wb = openpyxl.load_workbook('Example/example.xlsx')
 
     # Fragt nach dem workbook
-    wb = ask_workbook("") # BUG: Wenn falsch kann compare nicht weiter arbeiten
+    # wb = ask_workbook("") # BUG: Wenn falsch kann compare nicht weiter arbeiten
 
     # Ruft das Menü auf mit allen Funktionen des Programmes
     menu(wb)
