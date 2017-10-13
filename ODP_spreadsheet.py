@@ -9,7 +9,7 @@ import locale
 strings_language = []
 
 
-class Clear(object):
+class System(object):
     def exit(self):
         # Verlässt das Programm
         return sys.exit()
@@ -18,25 +18,39 @@ class Clear(object):
         # Räumt den Terminal Output auf
         os.system("cls" if os.name == "nt" else "clear")
 
+    def continue_request(self, wb):
+        # Abfrage ob Programm beendet werden soll oder weiter laufen soll
+        try:
+            self.continue_loop = input("\n" + strings_language[7] + "\n" + "> ").lower().strip()
+        except KeyboardInterrupt:
+            self.exit()
 
-class Something(object):
+        if (self.continue_loop == "n") or (self.continue_loop == strings_language[0]):
+            self.exit()
+
+        else:
+            # Wenn nicht 'exit' geht es wieder zum Ausgangsmenü zurück
+            Menu().menu(wb)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! <- use this
+            # self.clear.exit()
+
+
+class Workbook(object):
     def __init__(self):
-        self.clear = Clear()
-        # self.menu = Menu()
-        
+        self.clear = System()
+
     def ask_workbook(self, input_string):
         while True:
             self.clear.clear()
             string = strings_language[6] + input_string + "\n" + "> "
-    
+
             try:
                 workbook_input = input(string).lower().strip()
             except KeyboardInterrupt:
                 self.clear.exit()
-    
+
             if workbook_input == strings_language[0]:
                 self.clear.exit()
-    
+
             else:
                 try:
                     # Falls es den Path gibt verwendet er nun dieses Workbook
@@ -44,50 +58,32 @@ class Something(object):
                 except FileNotFoundError:
                     self.clear.clear()
                     ask_continue = input("This File does not exist. Do you want to continue? [Y/n]\n> ").lower().strip()
-    
+
                     if ask_continue == 'n' or 'exit':
                         self.clear.exit()
                     else:
                         continue
 
-    def continue_request(self, wb):
-        # Abfrage ob Programm beendet werden soll oder weiter laufen soll
+    def copy(self):
+        # Fragt nach dem Namen der Datei C
+        print(strings_language[18])
         try:
-            self.continue_loop = input("\n" + strings_language[7] + "\n" + "> ").lower().strip()
+            self.copy_name = input(strings_language[17] + "\n" + "> ").lower().strip()
         except KeyboardInterrupt:
             self.clear.exit()
-    
-        if (self.continue_loop == "n") or (self.continue_loop == strings_language[0]):
+
+        if self.copy_name == strings_language[0]:
             self.clear.exit()
-    
+
         else:
-            # Wenn nicht 'exit' geht es wieder zum Ausgangsmenü zurück
-            self.menu.menu(wb) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! <- use this
-            # self.clear.exit()
-    
-    def what_sheet(self, wb):
-        try:
-            self.this_sheet = input(strings_language[21] + "\n" + "> ").strip()
-        except KeyboardInterrupt:
-            self.clear.exit()
-    
-        if self.this_sheet == strings_language[0]:
-            self.clear.exit()
-    
-        elif self.this_sheet == "":
-            # Wenn nur Enter gedrückt wird wird das aktive Sheet als default genommen
-            return wb.get_active_sheet()
-    
-        else:
-            try:
-                # Falls der Inputname existiert wird das ausgewählte Sheet benutzt
-                return wb.get_sheet_by_name(self.this_sheet)
-            except KeyError:
-                # Wenn nicht wird das Terminal aufgeräumt, eine Fehlermeldung ausgegeben und es wird erneut view abgefragt
-                self.clear.clear()
-                print("\n" + strings_language[38] + "\n".format(self.this_sheet))
-                self.get_sheet(wb)
-    
+            # Gibt den Pfad zurück
+            return "Example/" + self.copy_name
+
+
+class Sheets(object):
+    def __init__(self):
+        self.clear = System()
+
     def list_sheets(self, wb):
         # Listet alle Sheets in dem workbook auf
         try:
@@ -100,13 +96,41 @@ class Something(object):
             # self.menu.menu(wb) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! <- use this
             self.clear.exit()
         counter = 1
-    
+
         for string in self.sheets:
             print(strings_language[37].format(counter, string))
-    
+
             # counter zur Orientierung des Endusers
             counter += 1
-    
+
+    def what_sheet(self, wb):
+        try:
+            self.this_sheet = input(strings_language[21] + "\n" + "> ").strip()
+        except KeyboardInterrupt:
+            self.clear.exit()
+
+        if self.this_sheet == strings_language[0]:
+            self.clear.exit()
+
+        elif self.this_sheet == "":
+            # Wenn nur Enter gedrückt wird wird das aktive Sheet als default genommen
+            return wb.get_active_sheet()
+
+        else:
+            try:
+                # Falls der Inputname existiert wird das ausgewählte Sheet benutzt
+                return wb.get_sheet_by_name(self.this_sheet)
+            except KeyError:
+                # Wenn nicht wird das Terminal aufgeräumt, eine Fehlermeldung ausgegeben und es wird erneut view abgefragt
+                self.clear.clear()
+                print("\n" + strings_language[38] + "\n".format(self.this_sheet))
+                self.list_sheets(wb)
+                self.what_sheet(wb)
+
+class Sheet(object):
+    def __init__(self):
+        self.cell = Cell()
+
     def max_sheet(self, sheet):
         try:
             # Falls es eine Reihe und Spalte gibt wird die höchste wiedergegeben
@@ -114,170 +138,44 @@ class Something(object):
         except AttributeError:
             # Falls es keine Reihe oder Spalte gibt wird eine Fahlermeldung ausgegeben
             print(strings_language[19])
-    
-    def get_sheet(self, wb):
-        # Zeigt alle Sheets, fragt ab welches benutzt werden soll und gibt dieses wieder
-        self.list_sheets(wb)
-        return self.what_sheet(wb)
-    
-    def cell_value(self, sheet, row_first, column_first):
-        # Ermittelt durch Koordinaten den Inhalt der ausgewählten Zelle
-        return sheet.cell(row=int(row_first), column=int(column_first))
-    
+
     def get_values(self, sheet, row_count, column_count):
         all_raw_rows = []
         longest = 0
-    
+
         # Fügt die Spalten beschreibung hinzu
         all_raw_rows.append(i for i in range(1, row_count + 1))
-    
+
         for row in range(1, row_count + 1):
             innerlist = []
-    
+
             for column in range(1, column_count + 1):
                 # Ermittelt Zellen Inhalt
-                values = self.cell_value(sheet, row, column).value
-    
+                values = self.cell.cell_value(sheet, row, column).value
+
                 if values != None:
                     innerlist.append(values)
-    
+
                     # Ermittelt längsten Wert
                     if len(values) > longest:
                         longest = len(values)
-    
+
                 else:
                     # Abgrenzungen
                     innerlist.append("")
-    
+
             # Fügt alle zusammen
             all_raw_rows.append(innerlist)
         return all_raw_rows, longest
-    
-    def copy(self):
-        # Fragt nach dem Namen der Datei C
-        print(strings_language[18])
-        try:
-            self.copy_name = input(strings_language[17] + "\n" + "> ").lower().strip()
-        except KeyboardInterrupt:
-            self.clear.exit()
-    
-        if self.copy_name == strings_language[0]:
-            self.clear.exit()
-    
-        else:
-    
-            # Gibt den Pfad zurück
-            return "Example/" + self.copy_name
 
-class Compare(object):
+
+class Cell(object):
     def __init__(self):
-        self.clear = Clear()
-        self.som = Something()
+        self.clear = System()
 
-    def compare_sheets(self, first_values, second_values, first_data, first_workbook):
-        first_sheet_values = []
-    
-        for first_row in first_values:
-            for first_item in first_row:
-                if first_item != "":
-    
-                    # Teilt die Ausgangszelle per Leerzeichen
-                    item_list = first_item.split(" ")  # RE eher angebracht
-    
-                    for item_raw in item_list:
-                        # Filtert Kommata heraus
-                        item = item_raw.replace(",", "")  # RE eher angebracht
-    
-                        # Ermittelt die Postion der Reihe, der Spalte und die Position im String
-                        self.position_row = first_values.index(first_row)
-                        self.position_column = first_row.index(first_item)
-                        self.position_string = item_list.index(item_raw)
-    
-                        # Gibt das Objekt mit den Koordinaten weiter
-                        first_sheet_values.append([item, (self.position_row + 1, self.position_column + 1, self.position_string)])
-    
-                    # Setzt "done" ans ende des benutzten Objektes damit selbes Item mit anderen Koordinaten existieren kann
-                    first_row[self.position_column] += "done"
-    
-        for second_row in second_values:
-            for second_item in second_row:
-    
-                # Wenn item Leer ist weiter machen
-                if second_item == "":
-                    pass
-    
-                else:
-                    # Löscht Leerzeichen und teilt Werte auf durch "="
-                    second_item = second_item.replace(" ", "").split("=")
-    
-                    for cell in first_sheet_values:  # iter nicht immer über alle
-                        item = cell[0]
-    
-                        # Wenn Übereinstimmung des Wertes und des Vergleichsobjekt
-                        if second_item[0] == item:
-    
-                            # Ermittelt die position
-                            row = cell[1][0]
-                            column = cell[1][1]
-                            pos = self.som.cell_value(first_data, row, column).coordinate
-    
-                            # Ermittelt Inhalt der Zelle
-                            value = first_data[pos].value
-    
-                            ####################################################################
-                            # Gucken ob 'find' nicht den oberen Abschnitt der Funktion ersetzt #
-                            ####################################################################
-    
-                            # Sucht Vergleichs datei in Ausgangsdatei
-                            index = value.find(second_item[0])
-    
-                            try:  # Checken ob Errorhandling nötig
-                                # Löscht Vergleichsdatei in Ausgangsdatie
-                                value = value.replace(second_item[0], "")
-    
-                                # Setzt String wieder zusammen
-                                value = value[:index] + second_item[1] + value[index:]
-    
-                                first_data[pos] = value
-                            except IndexError:
-                                pass
-        # Erstellt kopie von von Datei A und speichert es in Datei C
-        third_name = self.som.copy()
-        first_workbook.save(third_name)
-    
-    
-    def sheets_to_compare(self, wb):  # Überlegung ob nötig
-        try:
-            self.user_workbook = input(strings_language[16] + "\n" + "> ").lower().strip()
-        except KeyboardInterrupt:
-            self.clear.exit()
-    
-        sheet = None
-        workbook = None
-    
-        if self.user_workbook == strings_language[0]:
-            self.clear.exit()
-    
-        elif self.user_workbook == "n":
-            # Erfolgt wenn anderes Workbook genutzt werden soll und ermittelt das Worksheet
-            workbook = self.som.ask_workbook("\n" + strings_language[15])
-            self.clear.clear()
-            self.som.get_sheet(workbook)
-            self.clear.clear()
-    
-        else:
-            # Erfolgt wenn selbes Workbook genutzt werden soll und ermittelt das Worksheet
-            workbook = wb
-            self.clear.clear()
-            self.sheet = self.som.get_sheet(workbook)
-            self.clear.clear()
-    
-        return self.sheet, self.user_workbook, workbook
-
-class Grid(object):
-    def __init__(self):
-        self.clear = Clear()
-        self.som = Something()
+    def cell_value(self, sheet, row_first, column_first):
+        # Ermittelt durch Koordinaten den Inhalt der ausgewählten Zelle
+        return sheet.cell(row=int(row_first), column=int(column_first))
 
     def position(self, sheet):
         while True:
@@ -285,66 +183,182 @@ class Grid(object):
                 self.position_data = input(strings_language[12] + "\n" + "> ").lower().strip()
             except KeyboardInterrupt:
                 self.clear.exit()
-    
+
             if self.position_data == strings_language[0]:
                 self.clear.exit()
-    
+
             else:
                 self.clear.clear()
                 self.position_data = self.position_data.split(",")
-    
+
                 try:
                     strings_language[36].format(self.position_data)
-                    print(strings_language[36].format(self.som.cell_value(sheet, self.position_data[0], self.position_data[1]).value))
-    
+                    print(strings_language[36].format(
+                        self.cell_value(sheet, self.position_data[0], self.position_data[1]).value))
+
                 except (ValueError, IndexError):
                     self.clear.clear()
-                    ask_continue = input("This Position does not exist. Do you want to continue? [Y/n]\n> ").lower().strip()
-    
+                    ask_continue = input("This Position does not exist. Do you want to continue? [Y/n]\n> ").lower().strip() # noch ändern
+
                     if ask_continue == 'n' or 'exit':
                         self.clear.exit()
                     else:
-                        continue
-    
-    
+                        self.position()
+
+
+class Compare(object):
+    def __init__(self):
+        self.clear = System()
+        self.workbook = Workbook()
+        self.sheets = Sheets()
+        self.cell = Cell()
+
+    def sheets_to_compare(self, wb):  # Überlegung ob nötig
+        try:
+            self.user_workbook = input(strings_language[16] + "\n" + "> ").lower().strip()
+        except KeyboardInterrupt:
+            self.clear.exit()
+
+        sheet = None
+        workbook = None
+
+        if self.user_workbook == strings_language[0]:
+            self.clear.exit()
+
+        elif self.user_workbook == "n":
+            # Erfolgt wenn anderes Workbook genutzt werden soll und ermittelt das Worksheet
+            workbook = self.workbook.ask_workbook("\n" + strings_language[15])
+            self.clear.clear()
+            self.sheets.list_sheets(workbook)
+            self.sheets.what_sheet(workbook)
+            self.clear.clear()
+
+        else:
+            # Erfolgt wenn selbes Workbook genutzt werden soll und ermittelt das Worksheet
+            workbook = wb
+            self.clear.clear()
+            self.sheets.list_sheets(workbook)
+            self.sheet = self.sheets.what_sheet(workbook)
+            self.clear.clear()
+
+        return self.sheet, self.user_workbook, workbook
+
+    def compare_sheets(self, first_values, second_values, first_data, first_workbook):
+        first_sheet_values = []
+
+        for first_row in first_values:
+            for first_item in first_row:
+                if first_item != "":
+
+                    # Teilt die Ausgangszelle per Leerzeichen
+                    item_list = first_item.split(" ")  # RE eher angebracht
+
+                    for item_raw in item_list:
+                        # Filtert Kommata heraus
+                        item = item_raw.replace(",", "")  # RE eher angebracht
+
+                        # Ermittelt die Postion der Reihe, der Spalte und die Position im String
+                        self.position_row = first_values.index(first_row)
+                        self.position_column = first_row.index(first_item)
+                        self.position_string = item_list.index(item_raw)
+
+                        # Gibt das Objekt mit den Koordinaten weiter
+                        first_sheet_values.append(
+                            [item, (self.position_row + 1, self.position_column + 1, self.position_string)])
+
+                    # Setzt "done" ans ende des benutzten Objektes damit selbes Item mit anderen Koordinaten existieren kann
+                    first_row[self.position_column] += "done"
+
+        for second_row in second_values:
+            for second_item in second_row:
+
+                # Wenn item Leer ist weiter machen
+                if second_item == "":
+                    pass
+
+                else:
+                    # Löscht Leerzeichen und teilt Werte auf durch "="
+                    second_item = second_item.replace(" ", "").split("=")
+
+                    for cell in first_sheet_values:  # iter nicht immer über alle
+                        item = cell[0]
+
+                        # Wenn Übereinstimmung des Wertes und des Vergleichsobjekt
+                        if second_item[0] == item:
+
+                            # Ermittelt die position
+                            row = cell[1][0]
+                            column = cell[1][1]
+                            pos = self.cell.cell_value(first_data, row, column).coordinate
+
+                            # Ermittelt Inhalt der Zelle
+                            value = first_data[pos].value
+
+                            ####################################################################
+                            # Gucken ob 'find' nicht den oberen Abschnitt der Funktion ersetzt #
+                            ####################################################################
+
+                            # Sucht Vergleichs datei in Ausgangsdatei
+                            index = value.find(second_item[0])
+
+                            try:  # Checken ob Errorhandling nötig
+                                # Löscht Vergleichsdatei in Ausgangsdatie
+                                value = value.replace(second_item[0], "")
+
+                                # Setzt String wieder zusammen
+                                value = value[:index] + second_item[1] + value[index:]
+
+                                first_data[pos] = value
+                            except IndexError:
+                                pass
+        # Erstellt kopie von von Datei A und speichert es in Datei C
+        third_name = self.workbook.copy()
+        first_workbook.save(third_name)
+
+
+class Grid(object):
+    def __init__(self):
+        self.clear = System()
+
     def grid(self, values, longest):
         # Convertiert die Werte in symetrische Reihen aus Strings
         string_rows = []
         for rows_in_list in values:
             raw_temp = []
-    
+
             for item in rows_in_list:
                 # Ermittelt die länge der spezifischen Zelle
                 value_length = longest + 1 - len(str(item))
-    
+
                 # Setzt die Reihe zusammen
                 raw_temp.append(str(item) + " " * value_length + "|")
-    
+
             # Fügt die Reihe dem Raster hinzu
             string_rows.append(raw_temp)
-    
+
         # Fügt Reihenzahlen hinzu und gibt die Tabelle aus
         for row in string_rows:
             string_temp = ""
-    
+
             # Ermittelt die Reihenzahl
             string_temp += str(string_rows.index(row)) + "| "
-    
+
             for i in range(0, len(row)):
                 # Fügt die Reihenzahlen und die restliche Reihe zusammen
                 string_temp += row[i]
-    
+
             # Gibt die Tabelle aus
             print(string_temp)
 
 
 class Menu(object):
     def __init__(self):
-        self.clear = Clear()
         self.compare = Compare()
         self.grid = Grid()
-
-        self.som = Something()
+        self.sheet = Sheet()
+        self.workbook = Workbook()
+        self.sheets = Sheets()
+        self.cell = Cell()
 
     def compares(self, wb):
         # Ermittelt die gewünschten Worksheets und Workbooks
@@ -359,18 +373,18 @@ class Menu(object):
         second_data = data_second[0]
 
         # Ermittelt Maximale Reihe und Spalte des ersten Worksheets
-        first_max_sheet = self.som.max_sheet(first_data)
+        first_max_sheet = self.sheet.max_sheet(first_data)
         first_max_row = first_max_sheet[0]
         first_max_column = first_max_sheet[1]
 
         # Ermittelt Maximale Reihe und Spalte des zweiten Worksheets
-        second_max_sheet = self.som.max_sheet(second_data)
+        second_max_sheet = self.sheet.max_sheet(second_data)
         second_max_row = second_max_sheet[0]
         second_max_column = second_max_sheet[1]
 
         # Ermittelt die Werte der Worksheets
-        first_values = self.som.get_values(first_data, first_max_row, first_max_column)[0]
-        second_values = self.som.get_values(second_data, second_max_row, second_max_column)[0]
+        first_values = self.sheet.get_values(first_data, first_max_row, first_max_column)[0]
+        second_values = self.sheet.get_values(second_data, second_max_row, second_max_column)[0]
 
         # Löschen des ersten Wertes
         del first_values[0]
@@ -381,30 +395,72 @@ class Menu(object):
 
     def all(self, wb):
         # Fragt das Worksheet ab
-        sheet = self.som.get_sheet(wb)
-        self.clear.clear()
+        self.sheets.list_sheets(wb)
+        sheet = self.sheets.what_sheet(wb)
+        System().clear()
 
         # Ermittelt Maximale Reihe und Spalte
-        max_row_column = self.som.max_sheet(sheet)
+        max_row_column = self.sheet.max_sheet(sheet)
         max_row = max_row_column[0]
         max_column = max_row_column[1]
 
         # Ermittelt die Rohwerte der Reihen
-        values = self.som.get_values(sheet, max_row, max_column)[0]
+        values = self.sheet.get_values(sheet, max_row, max_column)[0]
 
         # Ermittelt die längste Zelle des Worksheets
-        longest = self.som.get_values(sheet, max_row, max_column)[1]
+        longest = self.sheet.get_values(sheet, max_row, max_column)[1]
 
         # Verarbeitet die Werte zu einem Grid von Strings
         self.grid.grid(values, longest)
 
     def view(self, wb):
         # Fragt das Worksheet ab
-        sheet = self.som.get_sheet(wb)
-        self.clear.clear()
+        self.sheets.list_sheets(wb)
+        sheet = self.sheets.what_sheet(wb)
+        System().clear()
 
         # Ermittelt den Wert der Zelle und gibt ihn aus
-        self.grid.position(sheet)
+        self.cell.position(sheet)
+
+    def language(self):
+        locale.getdefaultlocale()
+
+        while True:
+            System().clear()
+            print("Type 'ger' for german.")
+            print("Type 'eng' for englisch.")
+
+            try:
+                self.ask_language = input("Which language should your programm use?\n> ").lower().strip()
+            except KeyboardInterrupt:
+                System().exit()
+
+            if self.ask_language == 'exit':
+                System().exit()
+
+            elif self.ask_language == 'ger':
+                # Liest die Deutschen Strings aus
+                with open("Languages/german", "r") as file:
+                    for line in file:
+                        full_line = line.replace("\n", "")
+                        strings_language.append(full_line)
+                break
+
+            elif self.ask_language == 'eng':
+                # Liest die Englischen Strings aus
+                with open("Languages/englisch", "r") as file:
+                    for line in file:
+                        full_line = line.replace("\n", "")
+                        strings_language.append(full_line)
+                break
+
+            else:
+                System().clear()
+                ask_continue = input("This language does not exist. Do you want to continue? [Y/n]\n> ").lower().strip()
+                if ask_continue != 'exit' or 'n':
+                    continue
+                else:
+                    System().exit()
 
     def help(self):
         # Die einzelnen Funktionen und ihre Beschreibung
@@ -429,19 +485,19 @@ class Menu(object):
         try:
             self.ask_function = input("\n" + strings_language[10] + "\n" + "> ").lower().strip()
         except KeyboardInterrupt:
-            self.clear.exit()
+            System().exit()
 
         if self.ask_function == strings_language[0]:
-            self.clear.exit()
+            System().exit()
 
         else:
             # Gibt theoretisch die weitere Beschreibung aus
-            self.clear.clear()
+            System().clear()
             print(strings_language[9])
 
     def menu(self, wb):
         # Das Ausgangsmenü um auf alle Funktionen zugreifen zu können
-        self.clear.clear()
+        System().clear()
 
         while True:
             # Alle möglichen Funktionen des Programmes
@@ -456,97 +512,56 @@ class Menu(object):
             try:
                 user_input = input("> ").lower().strip()
             except KeyboardInterrupt:
-                self.clear.exit()
+                System().exit()
 
             # DEBUG: Als default der Eingabe:
             # user_input = strings_language[3]
 
             if user_input == strings_language[0]:
-                self.clear.exit()
+                System().exit()
 
             elif user_input == strings_language[4]:
                 # Zum betrachten des Wertes einer einzelner Zellen
-                self.clear.clear()
+                System().clear()
                 self.view(wb)
-                self.som.continue_request(wb)
+                System().continue_request(wb)
 
             elif user_input == strings_language[2]:
                 # Zum ändern des aktuellen workbooks
-                self.clear.clear()
+                System().clear()
                 print(strings_language[8] + "\n")
-                wb = self.som.ask_workbook("")
-                self.clear.clear()
+                wb = self.workbook.ask_workbook("")
+                System().clear()
 
             elif user_input == strings_language[5]:
                 # Gibt den gesammten Inhalt des Sheets in einer Tabelle aus
-                self.clear.clear()
+                System().clear()
                 self.all(wb)
-                self.som.continue_request(wb)
+                System().continue_request(wb)
 
             elif user_input == strings_language[3]:
                 # Datei A wird mit Datei B verglichen und einstimmige Komponenten in Datei C geschrieben und ersetzt
-                self.clear.clear()
+                System().clear()
                 self.compares(wb)
-                self.som.continue_request(wb)
+                System().continue_request(wb)
 
             elif user_input == strings_language[1]:
                 # Beschreibt die Funktionen des Programmes
-                self.clear.clear()
+                System().clear()
                 self.help()
-                self.som.continue_request(wb)
+                System().continue_request(wb)
 
             else:
                 # ERROR: Wenn es die Funktion nicht gibt
-                self.clear.clear()
+                System().clear()
                 print(strings_language[23].format(user_input) + "\n")
                 continue
-
-    def language(self):
-        locale.getdefaultlocale()
-
-        while True:
-            self.clear.clear()
-            print("Type 'ger' for german.")
-            print("Type 'eng' for englisch.")
-
-            try:
-                self.ask_language = input("Which language should your programm use?\n> ").lower().strip()
-            except KeyboardInterrupt:
-                self.clear.exit()
-
-            if self.ask_language == 'exit':
-                self.clear.exit()
-
-            elif self.ask_language == 'ger':
-                # Liest die Deutschen Strings aus
-                with open("Languages/german", "r") as file:
-                    for line in file:
-                        full_line = line.replace("\n", "")
-                        strings_language.append(full_line)
-                break
-
-            elif self.ask_language == 'eng':
-                # Liest die Englischen Strings aus
-                with open("Languages/englisch", "r") as file:
-                    for line in file:
-                        full_line = line.replace("\n", "")
-                        strings_language.append(full_line)
-                break
-
-            else:
-                self.clear.clear()
-                ask_continue = input("This language does not exist. Do you want to continue? [Y/n]\n> ").lower().strip()
-                if ask_continue != 'exit' or 'n':
-                    continue
-                else:
-                    self.clear.exit()
 
 
 def main():
     menu = Menu()
-    clear = Clear()
-
-    som = Something()
+    clear = System()
+    workbook = Workbook()
 
     # Fragt Welche Sprache
     menu.language()
@@ -556,7 +571,7 @@ def main():
     wb = openpyxl.load_workbook('Example/example.xlsx')
 
     # Fragt nach dem workbook
-    # wb = som.ask_workbook("")  # BUG: Wenn falsch kann compare nicht weiter arbeiten
+    # wb = workbook.ask_workbook("")  # BUG: Wenn falsch kann compare nicht weiter arbeiten
 
     # Ruft das Menü auf mit allen Funktionen des Programmes
     menu.menu(wb)
