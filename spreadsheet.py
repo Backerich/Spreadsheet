@@ -540,10 +540,10 @@ def main():
     clear()
 
     # DEBUG: Default Workbbok zum Debuggen
-    # wb = openpyxl.load_workbook('Example/example.xlsx')
+    wb = openpyxl.load_workbook('Example/example.xlsx')
 
     # Fragt nach dem workbook
-    wb = ask_workbook("") # BUG: Wenn falsch kann compare nicht weiter arbeiten
+    # wb = ask_workbook("") # BUG: Wenn falsch kann compare nicht weiter arbeiten
 
     # Ruft das Menü auf mit allen Funktionen des Programmes
     menu(wb)
