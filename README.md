@@ -2,7 +2,7 @@
 
 ## Overview
 SPREADSHEET is a tool that automates finding according data in workbook B and replacing them in workbook A.
-Is similar to the VLOOKUP Function in Excel.
+It is similar to the VLOOKUP Function in Excel.
 
 ## Example
 **Workbook A:**
